@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -25,6 +25,17 @@ with app.app_context():
         test_request = Request(requester_name="山田太郎", content="新しい機能を追加してください")
         db.session.add(test_request)
         db.session.commit()
+
+@app.route('/requests', methods=['POST'])
+def add_request():
+    data = request.get_json()
+    new_request = Request(
+        requester_name=data['requester_name'],
+        content=data['content']
+    )
+    db.session.add(new_request)
+    db.session.commit()
+    return jsonify({'message': '新しい要望が追加されました', 'request': data}), 201
 
 @app.route('/requests', methods=['GET'])
 def get_requests():
