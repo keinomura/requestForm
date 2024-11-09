@@ -7,7 +7,7 @@
       <v-btn text to="/add-request">新規要望の追加</v-btn>
       <v-btn text to="/update-progress">進捗情報の更新</v-btn>
     </v-app-bar>
-    <v-main>
+    <v-main class="main-content">
       <router-view />
     </v-main>
   </v-app>
@@ -20,6 +20,9 @@ export default {
 </script>
 
 <style scoped>
+.main-content {
+  margin-top: 64px; /* v-app-barの高さに合わせて調整 */
+}
 
 .v-btn {
   margin-left: 8px;
