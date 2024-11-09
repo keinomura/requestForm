@@ -11,9 +11,25 @@ db = SQLAlchemy(app)
 
 # モデルの定義
 class Request(db.Model):
+    __tablename__ = 'Requests'
     id = db.Column(db.Integer, primary_key=True)
-    requester_name = db.Column(db.String(80), nullable=False)
-    content = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    requester_department = db.Column(db.String(255))
+    requester_name = db.Column(db.String(255))
+    input_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+class Response(db.Model):
+    __tablename__ = 'Responses'
+    id = db.Column(db.Integer, primary_key=True)
+    request_id = db.Column(db.Integer, db.ForeignKey('Requests.id'))
+    handler_company = db.Column(db.String(255))
+    handler_department = db.Column(db.String(255))
+    handler_name = db.Column(db.String(255))
+    status = db.Column(db.String(50), default='未対応')
+    response_comment = db.Column(db.Text)
+    final_response = db.Column(db.Text)
+    response_date = db.Column(db.DateTime)
+    final_response_date = db.Column(db.DateTime)
 
 # データベースの初期化（初回のみ必要）
 with app.app_context():
@@ -29,22 +45,30 @@ with app.app_context():
 @app.route('/requests', methods=['POST'])
 def add_request():
     data = request.get_json()
+    if 'requester_department' not in data:
+        return jsonify({'error': 'requester_department is required'}), 400
     new_request = Request(
-        requester_name=data['requester_name'],
-        content=data['content']
+        content=data['content'],
+        requester_department=data['requester_department'],
+        requester_name=data['requester_name']
     )
     db.session.add(new_request)
     db.session.commit()
-    return jsonify({'message': '新しい要望が追加されました', 'request': data}), 201
+    return jsonify({'message': '新しい要望が追加されました'}), 201
 
 @app.route('/requests', methods=['GET'])
 def get_requests():
     requests = Request.query.all()
-    result = [
-        {'id': req.id, 'requester_name': req.requester_name, 'content': req.content}
-        for req in requests
-    ]
-    return jsonify(result)
+    output = []
+    for req in requests:
+        output.append({
+            'id': req.id,
+            'content': req.content,
+            'requester_department': req.requester_department,
+            'requester_name': req.requester_name,
+            'input_date': req.input_date
+        })
+    return jsonify(output)
 
 if __name__ == '__main__':
     app.run(debug=True)
