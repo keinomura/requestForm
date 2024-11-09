@@ -8,6 +8,8 @@
         class="elevation-1"
         item-key="id"
         dense
+        :item-class="getRowClass"
+
       ></v-data-table>
     </v-card>
   </v-container>
@@ -18,11 +20,13 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const headers = [
-  { text: 'ID', value: 'id' },
+{ text: 'ID', value: 'id' },
   { text: '内容', value: 'content' },
   { text: '部署', value: 'requester_department' },
   { text: '氏名', value: 'requester_name' },
-  { text: '入力日', value: 'input_date' },
+  { text: '日時', value: 'input_date' },
+  { text: '対応状況', value: 'status' },
+  { text: '最新コメント', value: 'response_comment' },
 ];
 
 const requests = ref([]);
@@ -38,6 +42,13 @@ const fetchRequests = async () => {
 
 const viewDetails = (id) => {
   console.log("詳細ページのID:", id);
+};
+
+const getRowClass = (item) => {
+  if (item.status === '未対応') return 'status-pending';
+  if (item.status === '対応中') return 'status-in-progress';
+  if (item.status === '完了') return 'status-completed';
+  return '';
 };
 
 onMounted(() => {
@@ -95,5 +106,15 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+
+.status-pending {
+  background-color: #ffcccc;
+}
+.status-in-progress {
+  background-color: #fff3cd;
+}
+.status-completed {
+  background-color: #d4edda;
 }
 </style>

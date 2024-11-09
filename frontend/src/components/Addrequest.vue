@@ -11,7 +11,7 @@
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" @click="submitRequest">追加</v-btn>
-          <v-btn text @click="$router.push('/')">キャンセル</v-btn>
+          <v-btn text @click="$router.push('/')" style="background-color: blueviolet;">キャンセル</v-btn>
         </v-card-actions>
       </v-card>
     </v-container>
