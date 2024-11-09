@@ -1,25 +1,22 @@
 <template>
-    <div class="container">
-      <h2>新規要望の追加</h2>
-      <form @submit.prevent="submitRequest">
-        <div class="form-group">
-          <label for="content">内容</label>
-          <input type="text" id="content" v-model="content" required />
-        </div>
-        <div class="form-group">
-          <label for="department">部署</label>
-          <input type="text" id="department" v-model="requester_department" required />
-        </div>
-        <div class="form-group">
-          <label for="name">氏名</label>
-          <input type="text" id="name" v-model="requester_name" required />
-        </div>
-        <button type="submit">追加</button>
-      </form>
-    </div>
-    <button type="button" @click="$router.push('/')">キャンセル</button>
-
-  </template>
+    <v-container>
+      <v-card>
+        <v-card-title>新規要望の追加</v-card-title>
+        <v-card-text>
+          <v-form ref="form">
+            <v-text-field label="内容" v-model="content" required></v-text-field>
+            <v-text-field label="部署" v-model="requester_department" required></v-text-field>
+            <v-text-field label="氏名" v-model="requester_name" required></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="submitRequest">追加</v-btn>
+          <v-btn text @click="$router.push('/')">キャンセル</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-container>
+</template>
+  
   
   <script>
   import axios from 'axios';

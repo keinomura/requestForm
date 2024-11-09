@@ -1,16 +1,16 @@
 <template>
-  <div id="app">
-    <header>
-      <nav>
-        <router-link to="/">要望一覧</router-link> |
-        <router-link to="/add-request">新規要望の追加</router-link> |
-        <router-link to="/update-progress">進捗情報の更新</router-link>
-      </nav>
-    </header>
-    <main>
+  <v-app>
+    <v-app-bar app color="primary" dark>
+      <v-toolbar-title>要望管理システム</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn text to="/">要望一覧</v-btn>
+      <v-btn text to="/add-request">新規要望の追加</v-btn>
+      <v-btn text to="/update-progress">進捗情報の更新</v-btn>
+    </v-app-bar>
+    <v-main>
       <router-view />
-    </main>
-  </div>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
@@ -20,6 +20,10 @@ export default {
 </script>
 
 <style scoped>
+
+.v-btn {
+  margin-left: 8px;
+}
 /* 全体のレイアウト設定 */
 #app {
   font-family: Arial, sans-serif;
@@ -32,7 +36,7 @@ header {
   text-align: center;
   position: sticky;
   top: 0;
-  width: 100%;
+  width: 60%;
   z-index: 1000;
 }
 

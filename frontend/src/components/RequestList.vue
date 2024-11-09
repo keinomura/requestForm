@@ -1,69 +1,48 @@
 <template>
-
-
-  <div>
-    <nav>
-      <router-link to="/">要望一覧</router-link> |
-      <router-link to="/add-request">新規要望の追加</router-link> |
-      <router-link to="/update-progress">進捗情報の更新</router-link>
-    </nav>
-    <router-view />
-  </div>
-  <div class="container">
-    <h1>要望一覧</h1>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>内容</th>
-            <th>部署</th>
-            <th>氏名</th>
-            <th>入力日</th>
-            <th>詳細</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="request in requests" :key="request.id">
-            <td>{{ request.id }}</td>
-            <td class="content-column">{{ request.content }}</td>
-            <td>{{ request.requester_department }}</td>
-            <td>{{ request.requester_name }}</td>
-            <td>{{ new Date(request.input_date).toLocaleDateString() }}</td>
-            <td><button @click="viewDetails(request.id)">詳細</button></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <v-container class="my-2">
+    <v-card>
+      <v-card-title>要望一覧</v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="requests"
+        class="elevation-1"
+        item-key="id"
+        dense
+      ></v-data-table>
+    </v-card>
+  </v-container>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-export default {
-  data() {
-    return {
-      requests: []
-    };
-  },
-  methods: {
-    async fetchRequests() {
-      try {
-        const response = await axios.get('http://127.0.0.1:5000/requests');
-        this.requests = response.data;
-      } catch (error) {
-        console.error("APIからのデータ取得に失敗しました:", error);
-      }
-    },
-    viewDetails(id) {
-      console.log("詳細ページのID:", id);
-    }
-  },
-  mounted() {
-    this.fetchRequests();
+const headers = [
+  { text: 'ID', value: 'id' },
+  { text: '内容', value: 'content' },
+  { text: '部署', value: 'requester_department' },
+  { text: '氏名', value: 'requester_name' },
+  { text: '入力日', value: 'input_date' },
+];
+
+const requests = ref([]);
+
+const fetchRequests = async () => {
+  try {
+    const response = await axios.get('http://127.0.0.1:5000/requests');
+    requests.value = response.data;
+  } catch (error) {
+    console.error("APIからのデータ取得に失敗しました:", error);
   }
 };
+
+const viewDetails = (id) => {
+  console.log("詳細ページのID:", id);
+};
+
+onMounted(() => {
+  fetchRequests();
+});
 </script>
 
 <style scoped>
