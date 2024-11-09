@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)  # 全てのオリジンを許可
@@ -56,6 +57,29 @@ def add_request():
     db.session.commit()
     return jsonify({'message': '新しい要望が追加されました'}), 201
 
+@app.route('/responses', methods=['POST'])
+def add_response():
+    data = request.get_json()
+    
+    # 日付の変換
+    response_date = datetime.fromisoformat(data['response_date']) if 'response_date' in data else None
+    final_response_date = datetime.fromisoformat(data['final_response_date']) if 'final_response_date' in data else None
+    
+    new_response = Response(
+        request_id=data['request_id'],
+        handler_company=data.get('handler_company', ''),
+        handler_department=data.get('handler_department', ''),
+        handler_name=data.get('handler_name', ''),
+        status=data.get('status', '未対応'),
+        response_comment=data.get('response_comment', ''),
+        final_response=data.get('final_response', ''),
+        response_date=response_date,
+        final_response_date=final_response_date
+    )
+    db.session.add(new_response)
+    db.session.commit()
+    return jsonify({'message': '新しい対応が追加されました'}), 201
+
 @app.route('/requests', methods=['GET'])
 def get_requests():
     requests = Request.query.all()
@@ -69,6 +93,27 @@ def get_requests():
             'input_date': req.input_date
         })
     return jsonify(output)
+
+@app.route('/responses/<int:response_id>', methods=['PUT'])
+def update_response(response_id):
+    data = request.get_json()
+    response = Response.query.get(response_id)
+    if response is None:
+        return jsonify({'error': '指定された進捗情報が見つかりませんでした'}), 404
+    
+    # 更新内容
+    response.handler_company = data.get('handler_company', response.handler_company)
+    response.handler_department = data.get('handler_department', response.handler_department)
+    response.handler_name = data.get('handler_name', response.handler_name)
+    response.status = data.get('status', response.status)
+    response.response_comment = data.get('response_comment', response.response_comment)
+    response.final_response = data.get('final_response', response.final_response)
+    response.response_date = data.get('response_date', response.response_date)
+    response.final_response_date = data.get('final_response_date', response.final_response_date)
+
+    db.session.commit()
+    return jsonify({'message': '進捗情報が更新されました'})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
