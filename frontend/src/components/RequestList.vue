@@ -1,9 +1,11 @@
 <template>
 
-<div>
+
+  <div>
     <nav>
       <router-link to="/">要望一覧</router-link> |
-      <router-link to="/add-request">新規要望の追加</router-link>
+      <router-link to="/add-request">新規要望の追加</router-link> |
+      <router-link to="/update-progress">進捗情報の更新</router-link>
     </nav>
     <router-view />
   </div>
