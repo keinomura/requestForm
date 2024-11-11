@@ -52,6 +52,26 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="isCommentsDialogOpen" max-width="600px">
+      <v-card>
+        <v-card-title>コメント一覧</v-card-title>
+        <v-card-text>
+          <v-list>
+            <v-list-item v-for="comment in comments" :key="comment.response_date">
+              <v-list-item-content>
+                <v-list-item-title>{{ comment.handler_name }} ({{ comment.handler_department }})</v-list-item-title>
+                <v-list-item-subtitle>{{ comment.response_comment }}</v-list-item-subtitle>
+                <v-list-item-subtitle>更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeCommentsDialog">閉じる</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   </v-container>
 </template>
@@ -76,7 +96,9 @@ const headers = [
 
 const requests = ref([]);
 const isDialogOpen = ref(false);
+const isCommentsDialogOpen = ref(false);
 const currentRequest = ref({});
+const comments = ref([]);
 
 const fetchRequests = async () => {
   try {
@@ -131,8 +153,18 @@ const updateProgress = async () => {
   }
 };
 
-const viewDetails = (id) => {
-  console.log("詳細ページのID:", id);
+const viewDetails = async (id) => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:5000/requests/${id}/comments`);
+    comments.value = response.data;
+    isCommentsDialogOpen.value = true;
+  } catch (error) {
+    console.error("コメントの取得に失敗しました:", error);
+  }
+};
+
+const closeCommentsDialog = () => {
+  isCommentsDialogOpen.value = false;
 };
 
 const getRowClass = (item) => {

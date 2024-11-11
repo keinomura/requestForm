@@ -50,6 +50,7 @@ with app.app_context():
         db.session.add(test_request)
         db.session.commit()
 
+# 新しい要望を追加するAPI
 @app.route('/requests', methods=['POST'])
 def add_request():
     data = request.get_json()
@@ -107,24 +108,6 @@ def get_requests():
         })
     return jsonify(output)
 
-# 進捗情報の取得API :FIXME 要らないかも
-@app.route('/responses/<int:response_id>', methods=['PUT'])
-def update_response(response_id):
-    data = request.get_json()
-    response = Response.query.get(response_id)
-    if response is None:
-        return jsonify({'error': '指定された進捗情報が見つかりませんでした'}), 404
-    
-    # 更新内容
-    response.handler_company = data.get('handler_company', response.handler_company)
-    response.handler_department = data.get('handler_department', response.handler_department)
-    response.handler_name = data.get('handler_name', response.handler_name)
-    response.status = data.get('status', response.status)
-    response.response_comment = data.get('response_comment', response.response_comment)
-    response.final_response = data.get('final_response', response.final_response)
-    response.response_date = data.get('response_date', response.response_date)
-    response.final_response_date = data.get('final_response_date', response.final_response_date)
-
 # 進捗情報の更新API
 @app.route('/requests/<int:id>', methods=['PUT'])
 def update_request(id):
@@ -133,18 +116,45 @@ def update_request(id):
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
+    # Requestテーブルの更新
     request_item.status = data.get('status', request_item.status)
     request_item.response_comment = data.get('response_comment', request_item.response_comment)
     request_item.assigned_department = data.get('assigned_department', request_item.assigned_department)
     request_item.assigned_person = data.get('assigned_person', request_item.assigned_person)
     request_item.update_date = datetime.now()
 
+    # Responseテーブルに新しいコメントを追加
+    new_response = Response(
+        request_id=id,
+        handler_department=data.get('assigned_department', ''),
+        handler_name=data.get('assigned_person', ''),
+        status=data.get('status', '未対応'),
+        response_comment=data.get('response_comment', ''),
+        response_date=datetime.now()
+    )
+    db.session.add(new_response)
     db.session.commit()
     return jsonify({"message": "Request updated successfully"})
 
 
-    # db.session.commit()
-    # return jsonify({'message': '進捗情報が更新されました'})
+# 特定のリクエストに関連するコメントを取得するAPI
+@app.route('/requests/<int:id>/comments', methods=['GET'])
+def get_request_comments(id):
+    request_item = Request.query.get(id)
+    if not request_item:
+        return jsonify({"error": "Request not found"}), 404
+
+    responses = Response.query.filter_by(request_id=id).all()
+    comments = []
+    for response in responses:
+        comments.append({
+            'handler_department': response.handler_department,
+            'handler_name': response.handler_name,
+            'status': response.status,
+            'response_comment': response.response_comment,
+            'response_date': response.response_date
+        })
+    return jsonify(comments)
 
 
 if __name__ == '__main__':
