@@ -12,10 +12,47 @@
       >
         <template v-slot:item.actions="{ item }">
           <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
-          <v-btn color="secondary" @click="updateProgress(item.id)">進捗を入力</v-btn>
+          <v-btn color="secondary" @click="openUpdateDialog(item)">進捗を入力</v-btn>
         </template>
       </v-data-table>
     </v-card>
+
+    <v-dialog v-model="isDialogOpen" max-width="500px">
+      <v-card>
+        <v-card-title>進捗情報の更新</v-card-title>
+        <v-card-text>
+          <v-form ref="form">
+            <v-text-field
+              v-model="currentRequest.status"
+              label="対応状況"
+              required
+            ></v-text-field>
+            <v-textarea
+              v-model="currentRequest.response_comment"
+              label="最新コメント"
+              required
+            ></v-textarea>
+            <v-text-field
+              v-model="currentRequest.assigned_department"
+              label="担当部署"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="currentRequest.assigned_person"
+              label="担当者名"
+              required
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeDialog">キャンセル</v-btn>
+          <v-btn color="blue darken-1" text @click="updateProgress">更新</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
   </v-container>
 </template>
 
@@ -31,10 +68,15 @@ const headers = [
   { title: '登録日時', key: 'input_date' },
   { title: '対応状況', key: 'status' },
   { title: '最新コメント', key: 'response_comment' },
+  { title: '更新日時', key: 'update_date' },
+  { title: '担当部署', key: 'assigned_department' },
+  { title: '担当者名', key: 'assigned_person' },
   { title: 'アクション', key: 'actions', sortable: false },
 ];
 
 const requests = ref([]);
+const isDialogOpen = ref(false);
+const currentRequest = ref({});
 
 const fetchRequests = async () => {
   try {
@@ -49,6 +91,13 @@ const fetchRequests = async () => {
           hour: '2-digit',
           minute: '2-digit',
         }),
+        update_date: request.update_date ? new Date(request.update_date).toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }) : '',
       };
     });
   } catch (error) {
@@ -56,12 +105,34 @@ const fetchRequests = async () => {
   }
 };
 
-const viewDetails = (id) => {
-  console.log("詳細ページのID:", id);
+const openUpdateDialog = (item) => {
+  currentRequest.value = { ...item };
+  isDialogOpen.value = true;
 };
 
-const updateProgress = (id) => {
-  console.log(`進捗を入力: ${id}`);
+const closeDialog = () => {
+  isDialogOpen.value = false;
+};
+
+const updateProgress = async () => {
+  try {
+    currentRequest.value.update_date = new Date().toLocaleString('ja-JP', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`, currentRequest.value);
+    fetchRequests(); // 更新後にリストを再取得
+    closeDialog();
+  } catch (error) {
+    console.error("進捗情報の更新に失敗しました:", error);
+  }
+};
+
+const viewDetails = (id) => {
+  console.log("詳細ページのID:", id);
 };
 
 const getRowClass = (item) => {
