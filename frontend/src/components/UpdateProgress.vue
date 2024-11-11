@@ -23,9 +23,10 @@
           <input type="text" id="handler_name" v-model="handler_name" />
         </div>
         <button type="submit">更新</button>
+        <button type="button" @click="$router.push('/')" style="background-color: blueviolet;">キャンセル</button>
       </form>
     </div>
-    <button type="button" @click="$router.push('/')">キャンセル</button>
+    
 
   </template>
   

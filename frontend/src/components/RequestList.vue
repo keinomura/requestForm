@@ -9,7 +9,6 @@
         item-key="id"
         dense
         :item-class="getRowClass"
-
       >
         <template v-slot:item.actions="{ item }">
           <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
@@ -25,7 +24,7 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const headers = [
-{ text: 'ID', value: 'id' },
+  { text: 'ID', value: 'id' },
   { text: '内容', value: 'content' },
   { text: '部署', value: 'requester_department' },
   { text: '氏名', value: 'requester_name' },
