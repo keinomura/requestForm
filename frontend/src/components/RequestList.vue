@@ -28,7 +28,7 @@ const headers = [
   { title: '内容', key: 'content' },
   { title: '部署', key: 'requester_department' },
   { title: '氏名', key: 'requester_name' },
-  { title: '日時', key: 'input_date' },
+  { title: '登録日時', key: 'input_date' },
   { title: '対応状況', key: 'status' },
   { title: '最新コメント', key: 'response_comment' },
   { title: 'アクション', key: 'actions', sortable: false },
@@ -39,7 +39,18 @@ const requests = ref([]);
 const fetchRequests = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:5000/requests');
-    requests.value = response.data;
+    requests.value = response.data.map(request => {
+      return {
+        ...request,
+        input_date: new Date(request.input_date).toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+    });
   } catch (error) {
     console.error("APIからのデータ取得に失敗しました:", error);
   }
