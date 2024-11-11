@@ -24,14 +24,14 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const headers = [
-  { text: 'ID', value: 'id' },
-  { text: '内容', value: 'content' },
-  { text: '部署', value: 'requester_department' },
-  { text: '氏名', value: 'requester_name' },
-  { text: '日時', value: 'input_date' },
-  { text: '対応状況', value: 'status' },
-  { text: '最新コメント', value: 'response_comment' },
-  { text: 'アクション', value: 'actions', sortable: false },
+  { title: 'ID', key: 'id' },
+  { title: '内容', key: 'content' },
+  { title: '部署', key: 'requester_department' },
+  { title: '氏名', key: 'requester_name' },
+  { title: '日時', key: 'input_date' },
+  { title: '対応状況', key: 'status' },
+  { title: '最新コメント', key: 'response_comment' },
+  { title: 'アクション', key: 'actions', sortable: false },
 ];
 
 const requests = ref([]);
@@ -49,6 +49,10 @@ const viewDetails = (id) => {
   console.log("詳細ページのID:", id);
 };
 
+const updateProgress = (id) => {
+  console.log(`進捗を入力: ${id}`);
+};
+
 const getRowClass = (item) => {
   if (item.status === '未対応') return 'status-pending';
   if (item.status === '対応中') return 'status-in-progress';
@@ -62,64 +66,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.table-container {
-  max-height: 500px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-th, td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  text-align: center;
-  white-space: nowrap;
-}
-
-th {
-  background-color: #f9f9f9;
-  font-weight: bold;
-}
-
-.content-column {
-  text-align: left;
-  max-width: 250px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-button {
-  padding: 5px 10px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-.status-pending {
-  background-color: #ffcccc;
-}
-.status-in-progress {
-  background-color: #fff3cd;
-}
-.status-completed {
-  background-color: #d4edda;
+.completed-row {
+  background-color: #e0ffe0;
 }
 </style>
