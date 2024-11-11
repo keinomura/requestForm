@@ -138,13 +138,15 @@ const closeDialog = () => {
 
 const updateProgress = async () => {
   try {
-    currentRequest.value.update_date = new Date().toLocaleString('ja-JP', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    // currentRequest.value.update_date = new Date().toLocaleString('ja-JP', {
+    //   year: 'numeric',
+    //   month: '2-digit',
+    //   day: '2-digit',
+    //   hour: '2-digit',
+    //   minute: '2-digit',
+    // });
+    currentRequest.value.update_date = new Date()
+    console.log('保存' + currentRequest.value.update_date)
     await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`, currentRequest.value);
     fetchRequests(); // 更新後にリストを再取得
     closeDialog();
@@ -156,7 +158,19 @@ const updateProgress = async () => {
 const viewDetails = async (id) => {
   try {
     const response = await axios.get(`http://127.0.0.1:5000/requests/${id}/comments`);
-    comments.value = response.data;
+    comments.value = response.data.map(comment => {
+      console.log(comment.response_date);
+      return {
+        ...comment,
+        // response_date: new Date(comment.response_date).toString('ja-JP', {
+        //   year: 'numeric',
+        //   month: '2-digit',
+        //   day: '2-digit',
+        //   hour: '2-digit',
+        //   minute: '2-digit',
+        // }),
+      };
+    });
     isCommentsDialogOpen.value = true;
   } catch (error) {
     console.error("コメントの取得に失敗しました:", error);

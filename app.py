@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 # CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # 全てのオリジンを許可
@@ -24,7 +24,7 @@ class Request(db.Model):
     response_comment = db.Column(db.Text)
     assigned_department = db.Column(db.String(255))
     assigned_person = db.Column(db.String(255))
-    update_date = db.Column(db.DateTime)
+    update_date = db.Column(db.DateTime, default=db.func.current_timestamp())
 
 class Response(db.Model):
     __tablename__ = 'Responses'
@@ -36,7 +36,7 @@ class Response(db.Model):
     status = db.Column(db.String(50), default='未対応')
     response_comment = db.Column(db.Text)
     final_response = db.Column(db.Text)
-    response_date = db.Column(db.DateTime)
+    response_date = db.Column(db.DateTime, default=db.func.current_timestamp())
     final_response_date = db.Column(db.DateTime)
 
 # データベースの初期化（初回のみ必要）
@@ -104,7 +104,7 @@ def get_requests():
             'response_comment': request_item.response_comment,
             'assigned_department': request_item.assigned_department,
             'assigned_person': request_item.assigned_person,
-            'update_date': request_item.update_date
+            'update_date': (request_item.update_date).strftime('%Y-%m-%d %H:%M:%S') if request_item.update_date else None  # 日本時間に変換
         })
     return jsonify(output)
 
@@ -121,7 +121,10 @@ def update_request(id):
     request_item.response_comment = data.get('response_comment', request_item.response_comment)
     request_item.assigned_department = data.get('assigned_department', request_item.assigned_department)
     request_item.assigned_person = data.get('assigned_person', request_item.assigned_person)
-    request_item.update_date = datetime.now()
+    request_item.update_date = datetime.utcnow()
+
+    # デバッグ用のログを追加
+    print(f"Updated request_item.update_date: {request_item.update_date}")
 
     # Responseテーブルに新しいコメントを追加
     new_response = Response(
@@ -130,7 +133,7 @@ def update_request(id):
         handler_name=data.get('assigned_person', ''),
         status=data.get('status', '未対応'),
         response_comment=data.get('response_comment', ''),
-        response_date=datetime.now()
+        response_date=datetime.utcnow()
     )
     db.session.add(new_response)
     db.session.commit()
@@ -154,6 +157,7 @@ def get_request_comments(id):
             'response_comment': response.response_comment,
             'response_date': response.response_date
         })
+        print('res', response.response_date.time())
     return jsonify(comments)
 
 
