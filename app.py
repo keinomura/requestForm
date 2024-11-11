@@ -4,9 +4,11 @@ from flask_cors import CORS
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # 全てのオリジンを許可
+# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # 全てのオリジンを許可
+# CORS(app)
+CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///request_management.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -18,6 +20,11 @@ class Request(db.Model):
     requester_department = db.Column(db.String(255))
     requester_name = db.Column(db.String(255))
     input_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    status = db.Column(db.String(50), default='未対応')
+    response_comment = db.Column(db.Text)
+    assigned_department = db.Column(db.String(255))
+    assigned_person = db.Column(db.String(255))
+    update_date = db.Column(db.DateTime)
 
 class Response(db.Model):
     __tablename__ = 'Responses'
@@ -80,20 +87,27 @@ def add_response():
     db.session.commit()
     return jsonify({'message': '新しい対応が追加されました'}), 201
 
+# 要望一覧の取得API
 @app.route('/requests', methods=['GET'])
 def get_requests():
     requests = Request.query.all()
     output = []
-    for req in requests:
+    for request_item in requests:
         output.append({
-            'id': req.id,
-            'content': req.content,
-            'requester_department': req.requester_department,
-            'requester_name': req.requester_name,
-            'input_date': req.input_date
+            'id': request_item.id,
+            'content': request_item.content,
+            'requester_department': request_item.requester_department,
+            'requester_name': request_item.requester_name,
+            'input_date': request_item.input_date,
+            'status': request_item.status,
+            'response_comment': request_item.response_comment,
+            'assigned_department': request_item.assigned_department,
+            'assigned_person': request_item.assigned_person,
+            'update_date': request_item.update_date
         })
     return jsonify(output)
 
+# 進捗情報の取得API :FIXME 要らないかも
 @app.route('/responses/<int:response_id>', methods=['PUT'])
 def update_response(response_id):
     data = request.get_json()
@@ -111,8 +125,26 @@ def update_response(response_id):
     response.response_date = data.get('response_date', response.response_date)
     response.final_response_date = data.get('final_response_date', response.final_response_date)
 
+# 進捗情報の更新API
+@app.route('/requests/<int:id>', methods=['PUT'])
+def update_request(id):
+    data = request.json
+    request_item = Request.query.get(id)
+    if not request_item:
+        return jsonify({"error": "Request not found"}), 404
+
+    request_item.status = data.get('status', request_item.status)
+    request_item.response_comment = data.get('response_comment', request_item.response_comment)
+    request_item.assigned_department = data.get('assigned_department', request_item.assigned_department)
+    request_item.assigned_person = data.get('assigned_person', request_item.assigned_person)
+    request_item.update_date = datetime.now()
+
     db.session.commit()
-    return jsonify({'message': '進捗情報が更新されました'})
+    return jsonify({"message": "Request updated successfully"})
+
+
+    # db.session.commit()
+    # return jsonify({'message': '進捗情報が更新されました'})
 
 
 if __name__ == '__main__':
