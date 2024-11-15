@@ -108,7 +108,7 @@ def get_requests():
         })
     return jsonify(output)
 
-# 進捗情報の更新API
+# 進捗情報の更新API　:TODO: 進捗情報の更新APIを実装してください日付がうまくいきません。
 @app.route('/requests/<int:id>', methods=['PUT'])
 def update_request(id):
     data = request.json
