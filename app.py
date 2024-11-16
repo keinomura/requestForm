@@ -104,7 +104,9 @@ def get_requests():
             'response_comment': request_item.response_comment,
             'assigned_department': request_item.assigned_department,
             'assigned_person': request_item.assigned_person,
-            'update_date': (request_item.update_date).strftime('%Y-%m-%d %H:%M:%S') if request_item.update_date else None  # 日本時間に変換
+            # 'update_date': (request_item.update_date).strftime('%Y-%m-%d %H:%M:%S') if request_item.update_date else None  # 日本時間に変換
+            'update_date': request_item.update_date if request_item.update_date else None  # 日本時間に変換しない。 input_dataと同じ形式で返す
+
         })
     return jsonify(output)
 
