@@ -162,13 +162,13 @@ const viewDetails = async (id) => {
       console.log(comment.response_date);
       return {
         ...comment,
-        // response_date: new Date(comment.response_date).toString('ja-JP', {
-        //   year: 'numeric',
-        //   month: '2-digit',
-        //   day: '2-digit',
-        //   hour: '2-digit',
-        //   minute: '2-digit',
-        // }),
+        response_date: new Date(comment.response_date).toLocaleString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       };
     });
     isCommentsDialogOpen.value = true;
