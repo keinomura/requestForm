@@ -216,6 +216,7 @@ const getRowClass = (item) => {
 
 const openDeleteDialog = (item) => {
   currentRequest.value = item;
+  deletePassword.value = ''; // パスワードフィールドをリセット
   isDeleteDialogOpen.value = true;
 };
 
@@ -228,7 +229,7 @@ const deleteRequest = async () => {
     alert('パスワードが間違っています');
     return;
   }
-  
+
   try {
     await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`);
     alert('要望が削除されました');
