@@ -162,6 +162,18 @@ def get_request_comments(id):
         print('res', response.response_date.time())
     return jsonify(comments)
 
+#リクエストの削除API
+@app.route('/requests/<int:id>', methods=['DELETE'])
+def delete_request(id):
+    request_item = Request.query.get(id)
+    if not request_item:
+        return jsonify({"error": "Request not found"}), 404
+
+    db.session.delete(request_item)
+    db.session.commit()
+    return jsonify({"message": "Request deleted successfully"}), 200
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

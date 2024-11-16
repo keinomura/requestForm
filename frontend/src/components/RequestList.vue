@@ -13,6 +13,7 @@
         <template v-slot:item.actions="{ item }">
           <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
           <v-btn color="secondary" @click="openUpdateDialog(item)">進捗を入力</v-btn>
+          <v-btn color="red" @click="openDeleteDialog(item)">削除</v-btn>
         </template>
       </v-data-table>
     </v-card>
@@ -73,6 +74,28 @@
       </v-card>
     </v-dialog>
 
+    <v-dialog v-model="isDeleteDialogOpen" max-width="500px">
+      <v-card>
+        <v-card-title>要望の削除</v-card-title>
+        <v-card-text>
+          <p>ID: {{ currentRequest.id }}</p>
+          <p>内容: {{ currentRequest.content }}</p>
+          <p>登録日: {{ currentRequest.input_date }}</p>
+          <v-text-field
+            v-model="deletePassword"
+            label="削除用パスワードを入力してください"
+            type="password"
+            required
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeDeleteDialog">キャンセル</v-btn>
+          <v-btn color="red" text @click="deleteRequest">削除</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
@@ -97,6 +120,9 @@ const headers = [
 const requests = ref([]);
 const isDialogOpen = ref(false);
 const isCommentsDialogOpen = ref(false);
+const isDeleteDialogOpen = ref(false);
+const deletePassword = ref('');
+const passForDelete = 'del3377'
 const currentRequest = ref({});
 const comments = ref([]);
 
@@ -188,6 +214,32 @@ const getRowClass = (item) => {
   return '';
 };
 
+const openDeleteDialog = (item) => {
+  currentRequest.value = item;
+  deletePassword.value = ''; // パスワードフィールドをリセット
+  isDeleteDialogOpen.value = true;
+};
+
+const closeDeleteDialog = () => {
+  isDeleteDialogOpen.value = false;
+};
+
+const deleteRequest = async () => {
+  if (deletePassword.value !== passForDelete) {
+    alert('パスワードが間違っています');
+    return;
+  }
+
+  try {
+    await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`);
+    alert('要望が削除されました');
+    fetchRequests();
+    closeDeleteDialog();
+  } catch (error) {
+    console.error("要望の削除に失敗しました:", error);
+  }
+};
+
 onMounted(() => {
   fetchRequests();
 });
@@ -196,5 +248,11 @@ onMounted(() => {
 <style scoped>
 .completed-row {
   background-color: #e0ffe0;
+}
+.status-in-progress {
+  background-color: #fff3cd;
+}
+.status-completed {
+  background-color: #d4edda;
 }
 </style>
