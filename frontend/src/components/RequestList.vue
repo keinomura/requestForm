@@ -10,7 +10,7 @@
         dense
         :item-class="getRowClass"
       >
-        <template v-slot:item.actions="{ item }">
+        <template v-slot:[`item.actions`]="{ item }">
           <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
           <v-btn color="secondary" @click="openUpdateDialog(item)">進捗を入力</v-btn>
           <v-btn color="red" @click="openDeleteDialog(item)">削除</v-btn>
@@ -238,7 +238,6 @@ const viewDetails = async (id) => {
   try {
     const response = await axios.get(`http://127.0.0.1:5000/requests/${id}/comments`);
     comments.value = response.data.map(comment => {
-      console.log(comment.response_date);
       return {
         ...comment,
         response_date: new Date(comment.response_date).toLocaleString('ja-JP', {
