@@ -23,11 +23,12 @@
         <v-card-title>進捗情報の更新</v-card-title>
         <v-card-text>
           <v-form ref="form">
-            <v-text-field
+            <v-select
               v-model="currentRequest.status"
+              :items="statusOptions"
               label="対応状況"
               required
-            ></v-text-field>
+            ></v-select>
             <v-textarea
               v-model="currentRequest.response_comment"
               label="最新コメント"
@@ -115,6 +116,19 @@ const headers = [
   { title: '担当部署', key: 'assigned_department' },
   { title: '担当者名', key: 'assigned_person' },
   { title: 'アクション', key: 'actions', sortable: false },
+];
+
+const statusOptions = [
+  '未対応',
+  '覚知（対応検討中）',
+  '覚知（対応中）',
+  '要病院対応',
+  '一時対応完了（要作業）',
+  '対応完了（承認前）',
+  '対応完了（電カル委員会承認済）',
+  '要追加情報',
+  '対応保留',
+  '対応不可'
 ];
 
 const requests = ref([]);
