@@ -160,6 +160,7 @@ const deletePassword = ref('');
 const passForDelete = 'del3377'
 const updatePassword = ref('');
 const passForUpdate = 'del3377'
+const previousStatus = ref('');
 
 
 const currentRequest = ref({});
@@ -194,6 +195,7 @@ const fetchRequests = async () => {
 
 const openUpdateDialog = (item) => {
   currentRequest.value = { ...item };
+  previousStatus.value = item.status; // 現在のステータスを保存
   updatePassword.value = ''; // パスワードフィールドをリセット
   isDialogOpen.value = true;
 };
@@ -203,7 +205,7 @@ const closeDialog = () => {
 };
 
 const checkPassword = () => {
-  if (currentRequest.value.status === '対応完了（電カル委員会承認）') {
+  if (currentRequest.value.status === '対応完了（電カル委員会承認）'|| previousStatus.value === '対応完了（電カル委員会承認）') {
     isPasswordDialogOpen.value = true;
   } else {
     updateProgress();
