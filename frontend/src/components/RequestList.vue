@@ -49,7 +49,26 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDialog">キャンセル</v-btn>
-          <v-btn color="blue darken-1" text @click="updateProgress">更新</v-btn>
+          <v-btn color="blue darken-1" text @click="checkPassword">更新</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="isPasswordDialogOpen" max-width="500px">
+      <v-card>
+        <v-card-title>#電カル委員会完了承認パスワード確認</v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="updatePassword"
+            label="パスワード"
+            type="password"
+            required
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closePasswordDialog">キャンセル</v-btn>
+          <v-btn color="blue darken-1" text @click="updateProgress">確認</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -125,7 +144,7 @@ const statusOptions = [
   '要病院対応',
   '一時対応完了（要作業）',
   '対応完了（承認前）',
-  '対応完了（電カル委員会承認済）',
+  '対応完了（電カル委員会承認）',
   '要追加情報',
   '対応保留',
   '対応不可'
@@ -134,9 +153,15 @@ const statusOptions = [
 const requests = ref([]);
 const isDialogOpen = ref(false);
 const isCommentsDialogOpen = ref(false);
+const isPasswordDialogOpen = ref(false);
+
 const isDeleteDialogOpen = ref(false);
 const deletePassword = ref('');
 const passForDelete = 'del3377'
+const updatePassword = ref('');
+const passForUpdate = 'del3377'
+
+
 const currentRequest = ref({});
 const comments = ref([]);
 
@@ -169,6 +194,7 @@ const fetchRequests = async () => {
 
 const openUpdateDialog = (item) => {
   currentRequest.value = { ...item };
+  updatePassword.value = ''; // パスワードフィールドをリセット
   isDialogOpen.value = true;
 };
 
@@ -176,20 +202,31 @@ const closeDialog = () => {
   isDialogOpen.value = false;
 };
 
+const checkPassword = () => {
+  if (currentRequest.value.status === '対応完了（電カル委員会承認）') {
+    isPasswordDialogOpen.value = true;
+  } else {
+    updateProgress();
+  }
+};
+
+const closePasswordDialog = () => {
+  isPasswordDialogOpen.value = false;
+};
+
 const updateProgress = async () => {
+  if (currentRequest.value.status === '対応完了（電カル委員会承認）' && updatePassword.value !== passForUpdate) {
+    alert('パスワードが間違っています');
+    return;
+  }
+
   try {
-    // currentRequest.value.update_date = new Date().toLocaleString('ja-JP', {
-    //   year: 'numeric',
-    //   month: '2-digit',
-    //   day: '2-digit',
-    //   hour: '2-digit',
-    //   minute: '2-digit',
-    // });
     currentRequest.value.update_date = new Date()
     console.log('保存' + currentRequest.value.update_date)
     await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`, currentRequest.value);
     fetchRequests(); // 更新後にリストを再取得
     closeDialog();
+    closePasswordDialog();
   } catch (error) {
     console.error("進捗情報の更新に失敗しました:", error);
   }
