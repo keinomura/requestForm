@@ -5,7 +5,7 @@
       <v-spacer></v-spacer>
       <v-btn text to="/">要望一覧</v-btn>
       <v-btn text to="/add-request">新規要望の追加</v-btn>
-      <v-btn text @click="toggleMode">{{ isAdminMode ? '閲覧入力モード' : '管理用' }}</v-btn>
+      <v-btn text @click="toggleMode">{{ isAdminMode ? '閲覧入力モードへ移動' : '管理用へ移動' }}</v-btn>
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main class="main-content">
