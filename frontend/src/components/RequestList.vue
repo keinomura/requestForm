@@ -1,10 +1,35 @@
 <template>
   <v-container class="my-2">
     <v-card>
-      <v-card-title>要望一覧</v-card-title>
+      <v-card-title>
+        要望一覧
+        <v-spacer></v-spacer>
+        <!-- 検索ボタンの追加 -->
+        <v-btn color="primary" @click="isSearchDialogOpen = true">検索</v-btn>
+      </v-card-title>
+      <!-- 検索フォームのダイアログ -->
+      <v-dialog v-model="isSearchDialogOpen" max-width="600px">
+        <v-card>
+          <v-card-title>検索</v-card-title>
+          <v-card-text>
+            <v-form @submit.prevent="searchRequests">
+              <v-text-field v-model="search.content" label="内容" />
+              <v-text-field v-model="search.requester_department" label="部署" />
+              <v-text-field v-model="search.requester_name" label="氏名" />
+              <v-text-field v-model="search.assigned_department" label="担当部署" />
+              <v-text-field v-model="search.assigned_person" label="担当者名" />
+              <v-btn type="submit" color="primary">検索</v-btn>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text @click="isSearchDialogOpen = false">閉じる</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-data-table
         :headers="headers"
-        :items="requests"
+        :items="filteredRequests"
         class="elevation-1"
         item-key="id"
         dense
@@ -143,9 +168,9 @@ const props = defineProps({
 const route = useRoute();
 // const isAdminMode = ref(route.params.isAdminMode || false);
 
-watch(() => route.params.isAdminMode, (newVal) => {
-  isAdminMode.value = newVal;
-});
+// watch(() => route.params.isAdminMode, (newVal) => {
+//   isAdminMode.value = newVal;
+// });
 
 const headers = [
   { title: 'ID', key: 'id' },
@@ -183,15 +208,41 @@ const filteredStatusOptions = computed(() => {
 });
 
 const requests = ref([]);
+
+// 検索モード
+const search = ref({
+  content: '',
+  requester_department: '',
+  requester_name: '',
+  assigned_department: '',
+  assigned_person: ''
+});
+const isSearchDialogOpen = ref(false);
+
+const filteredRequests = computed(() => {
+  return requests.value.filter(request => {
+    const matchesContent = request.content?.includes(search.value.content) ?? true;
+    const matchesRequesterDepartment = request.requester_department?.includes(search.value.requester_department) ?? true;
+    const matchesRequesterName = request.requester_name?.includes(search.value.requester_name) ?? true;
+    const matchesAssignedDepartment = request.assigned_department?.includes(search.value.assigned_department) ?? true;
+    const matchesAssignedPerson = request.assigned_person?.includes(search.value.assigned_person) ?? true;
+
+    return matchesContent && matchesRequesterDepartment && matchesRequesterName && matchesAssignedDepartment && matchesAssignedPerson;
+  });
+});
+
+// dialog
 const isDialogOpen = ref(false);
 const isCommentsDialogOpen = ref(false);
 const isPasswordDialogOpen = ref(false);
-
 const isDeleteDialogOpen = ref(false);
+
+// password
 const deletePassword = ref('');
 const passForDelete = 'del3377'
 const updatePassword = ref('');
 const passForUpdate = 'del3377'
+
 const previousStatus = ref('');
 
 
@@ -225,47 +276,7 @@ const fetchRequests = async () => {
   }
 };
 
-const openUpdateDialog = (item) => {
-  currentRequest.value = { ...item };
-  previousStatus.value = item.status; // 現在のステータスを保存
-  updatePassword.value = ''; // パスワードフィールドをリセット
-  isDialogOpen.value = true;
-};
-
-const closeDialog = () => {
-  isDialogOpen.value = false;
-};
-
-const checkPassword = () => {
-  if (currentRequest.value.status === '対応完了（電カル委員会承認）'|| previousStatus.value === '対応完了（電カル委員会承認）') {
-    isPasswordDialogOpen.value = true;
-  } else {
-    updateProgress();
-  }
-};
-
-const closePasswordDialog = () => {
-  isPasswordDialogOpen.value = false;
-};
-
-const updateProgress = async () => {
-  if (currentRequest.value.status === '対応完了（電カル委員会承認）' && updatePassword.value !== passForUpdate) {
-    alert('パスワードが間違っています');
-    return;
-  }
-
-  try {
-    currentRequest.value.update_date = new Date()
-    console.log('保存' + currentRequest.value.update_date)
-    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`, currentRequest.value);
-    fetchRequests(); // 更新後にリストを再取得
-    closeDialog();
-    closePasswordDialog();
-  } catch (error) {
-    console.error("進捗情報の更新に失敗しました:", error);
-  }
-};
-
+// 詳細ダイアログ処理
 const viewDetails = async (id) => {
   try {
     const response = await axios.get(`http://127.0.0.1:5000/requests/${id}/comments`);
@@ -291,13 +302,37 @@ const closeCommentsDialog = () => {
   isCommentsDialogOpen.value = false;
 };
 
-const getRowClass = (item) => {
-  if (item.status === '未対応') return 'status-pending';
-  if (item.status === '対応中') return 'status-in-progress';
-  if (item.status === '完了') return 'status-completed';
-  return '';
+// 進捗更新ダイアログ処理
+const openUpdateDialog = (item) => {
+  currentRequest.value = { ...item };
+  previousStatus.value = item.status; // 現在のステータスを保存
+  updatePassword.value = ''; // パスワードフィールドをリセット
+  isDialogOpen.value = true;
 };
 
+const closeDialog = () => {
+  isDialogOpen.value = false;
+};
+
+const updateProgress = async () => {
+  if (currentRequest.value.status === '対応完了（電カル委員会承認）' && updatePassword.value !== passForUpdate) {
+    alert('パスワードが間違っています');
+    return;
+  }
+
+  try {
+    currentRequest.value.update_date = new Date()
+    console.log('保存' + currentRequest.value.update_date)
+    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`, currentRequest.value);
+    fetchRequests(); // 更新後にリストを再取得
+    closeDialog();
+    closePasswordDialog();
+  } catch (error) {
+    console.error("進捗情報の更新に失敗しました:", error);
+  }
+};
+
+// 削除ダイアログ処理
 const openDeleteDialog = (item) => {
   currentRequest.value = item;
   deletePassword.value = ''; // パスワードフィールドをリセット
@@ -323,6 +358,32 @@ const deleteRequest = async () => {
     console.error("要望の削除に失敗しました:", error);
   }
 };
+
+// パスワード入力ダイアログ処理
+const checkPassword = () => {
+  if (currentRequest.value.status === '対応完了（電カル委員会承認）'|| previousStatus.value === '対応完了（電カル委員会承認）') {
+    isPasswordDialogOpen.value = true;
+  } else {
+    updateProgress();
+  }
+};
+
+const closePasswordDialog = () => {
+  isPasswordDialogOpen.value = false;
+};
+
+
+
+
+
+// const getRowClass = (item) => {
+//   if (item.status === '未対応') return 'status-pending';
+//   if (item.status === '対応中') return 'status-in-progress';
+//   if (item.status === '完了') return 'status-completed';
+//   return '';
+// };
+
+
 
 const getStatusColor = (status) => {
   switch (status) {
