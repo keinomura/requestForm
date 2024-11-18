@@ -10,6 +10,9 @@
         dense
         :item-class="getRowClass"
       >
+        <template v-slot:[`item.status`]="{ item }">
+          <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
+        </template>
         <template v-slot:[`item.actions`]="{ item }">
           <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
           <v-btn
@@ -318,6 +321,33 @@ const deleteRequest = async () => {
     closeDeleteDialog();
   } catch (error) {
     console.error("要望の削除に失敗しました:", error);
+  }
+};
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case '未対応':
+      return 'red';
+    case '覚知（対応検討中）':
+      return 'orange';
+    case '覚知（対応中）':
+      return 'yellow';
+    case '要病院対応':
+      return 'blue';
+    case '一時対応完了（要作業）':
+      return 'light-green';
+    case '対応完了（承認前）':
+      return 'green';
+    case '対応完了（電カル委員会承認）':
+      return 'teal';
+    case '要追加情報':
+      return 'purple';
+    case '対応保留':
+      return 'grey';
+    case '対応不可':
+      return 'black';
+    default:
+      return 'grey';
   }
 };
 
