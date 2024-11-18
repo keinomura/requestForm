@@ -9,7 +9,7 @@
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main class="main-content">
-      <router-view />
+      <router-view :isAdminMode="isAdminMode" />
     </v-main>
   </v-app>
 </template>
@@ -18,8 +18,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const isAdminMode = ref(true);
-const router = useRouter();
+const isAdminMode = ref(false);
+// const router = useRouter();
 
 const toggleMode = () => {
   isAdminMode.value = !isAdminMode.value;

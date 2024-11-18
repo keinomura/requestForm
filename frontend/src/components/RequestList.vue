@@ -12,8 +12,16 @@
       >
         <template v-slot:[`item.actions`]="{ item }">
           <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
-          <v-btn color="secondary" @click="openUpdateDialog(item)">進捗を入力</v-btn>
-          <v-btn color="red" @click="openDeleteDialog(item)">削除</v-btn>
+          <v-btn
+            color="secondary"
+            @click="openUpdateDialog(item)"
+            :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
+          >進捗を入力</v-btn>
+          <v-btn
+            v-if="isAdminMode"
+            color="red"
+            @click="openDeleteDialog(item)"
+          >削除</v-btn>{{ isAdminMode }}
         </template>
       </v-data-table>
     </v-card>
@@ -120,8 +128,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
+import { useRoute } from 'vue-router';
+import { defineProps } from 'vue';
+
+const props = defineProps({
+  isAdminMode: Boolean
+});
+
+const route = useRoute();
+// const isAdminMode = ref(route.params.isAdminMode || false);
+
+watch(() => route.params.isAdminMode, (newVal) => {
+  isAdminMode.value = newVal;
+});
 
 const headers = [
   { title: 'ID', key: 'id' },
