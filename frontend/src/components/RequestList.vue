@@ -18,6 +18,34 @@
               <v-text-field v-model="search.requester_name" label="氏名" />
               <v-text-field v-model="search.assigned_department" label="担当部署" />
               <v-text-field v-model="search.assigned_person" label="担当者名" />
+              <v-row>
+                <v-col cols="6">
+                  <v-text-field v-model="search.input_date_start" label="登録日: 開始日時" type="date" />
+                  <v-dialog v-model="menu1" max-width="290px">
+                    <v-date-picker v-model="search.input_date_start" @change="menu1 = false"></v-date-picker>
+                  </v-dialog>
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field v-model="search.input_date_end" label="登録日: 終了日時" type="date" />
+                  <v-dialog v-model="menu2" max-width="290px">
+                    <v-date-picker v-model="search.input_date_end" @change="menu2 = false"></v-date-picker>
+                  </v-dialog>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="6">
+                  <v-text-field v-model="search.update_date_start" label="更新日: 開始日時" type="date" />
+                  <v-dialog v-model="menu3" max-width="290px">
+                    <v-date-picker v-model="search.update_date_start" @change="menu3 = false"></v-date-picker> 
+                  </v-dialog>
+                </v-col>
+                <v-col cols="6">
+                  <v-text-field v-model="search.update_date_end" label="更新日: 終了日時" type="date" />
+                  <v-dialog v-model="menu4" max-width="290px">
+                    <v-date-picker v-model="search.update_date_end" @change="menu4 = false"></v-date-picker>
+                  </v-dialog>
+                </v-col>
+              </v-row>
               <v-btn type="submit" color="primary">検索</v-btn>
             </v-form>
           </v-card-text>
@@ -215,9 +243,25 @@ const search = ref({
   requester_department: '',
   requester_name: '',
   assigned_department: '',
-  assigned_person: ''
+  assigned_person: '',
+  input_date_start: null,
+  input_date_end: null,
+  update_date_range: null
 });
 const isSearchDialogOpen = ref(false);
+const menu1 = ref(false);
+const menu2 = ref(false);
+const menu3 = ref(false);
+const menu4 = ref(false);
+
+const formatDate = (date) => {
+  if (!date) return '';
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = (`0${d.getMonth() + 1}`).slice(-2);
+  const day = (`0${d.getDate()}`).slice(-2);
+  return `${year}/${month}/${day}`;
+};
 
 const filteredRequests = computed(() => {
   return requests.value.filter(request => {
@@ -226,8 +270,12 @@ const filteredRequests = computed(() => {
     const matchesRequesterName = request.requester_name?.includes(search.value.requester_name) ?? true;
     const matchesAssignedDepartment = request.assigned_department?.includes(search.value.assigned_department) ?? true;
     const matchesAssignedPerson = request.assigned_person?.includes(search.value.assigned_person) ?? true;
+    const matchesInputDate = (!search.value.input_date_start || new Date(request.input_date) >= new Date(search.value.input_date_start)) &&
+                             (!search.value.input_date_end || new Date(request.input_date) <= new Date(search.value.input_date_end));
+    const matchesUpdateDate = (!search.value.update_date_start || new Date(request.update_date) >= new Date(search.value.update_date_start)) &&
+                              (!search.value.update_date_end || new Date(request.update_date) <= new Date(search.value.update_date_end));
 
-    return matchesContent && matchesRequesterDepartment && matchesRequesterName && matchesAssignedDepartment && matchesAssignedPerson;
+    return matchesContent && matchesRequesterDepartment && matchesRequesterName && matchesAssignedDepartment && matchesAssignedPerson && matchesInputDate && matchesUpdateDate;
   });
 });
 
