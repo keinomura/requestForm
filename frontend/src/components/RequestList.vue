@@ -21,7 +21,7 @@
             v-if="isAdminMode"
             color="red"
             @click="openDeleteDialog(item)"
-          >削除</v-btn>{{ isAdminMode }}
+          >削除</v-btn>
         </template>
       </v-data-table>
     </v-card>
