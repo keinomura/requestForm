@@ -5,7 +5,7 @@
       <v-spacer></v-spacer>
       <v-btn text to="/">要望一覧</v-btn>
       <v-btn text to="/add-request">新規要望の追加</v-btn>
-      <v-btn text to="/update-progress">進捗情報の更新</v-btn>
+      <v-spacer></v-spacer>
     </v-app-bar>
     <v-main class="main-content">
       <router-view />
