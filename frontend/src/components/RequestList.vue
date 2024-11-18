@@ -18,6 +18,7 @@
               <v-text-field v-model="search.requester_name" label="氏名" />
               <v-text-field v-model="search.assigned_department" label="担当部署" />
               <v-text-field v-model="search.assigned_person" label="担当者名" />
+              <v-select v-model="search.status" :items="statusOptions" label="対応状況" multiple />
               <v-row>
                 <v-col cols="6">
                   <v-text-field v-model="search.input_date_start" label="登録日: 開始日時" type="date" />
@@ -244,6 +245,7 @@ const search = ref({
   requester_name: '',
   assigned_department: '',
   assigned_person: '',
+  status: [],
   input_date_start: null,
   input_date_end: null,
   update_date_range: null
@@ -270,12 +272,13 @@ const filteredRequests = computed(() => {
     const matchesRequesterName = request.requester_name?.includes(search.value.requester_name) ?? true;
     const matchesAssignedDepartment = request.assigned_department?.includes(search.value.assigned_department) ?? true;
     const matchesAssignedPerson = request.assigned_person?.includes(search.value.assigned_person) ?? true;
+    const matchesStatus = search.value.status.length === 0 || search.value.status.includes(request.status);
     const matchesInputDate = (!search.value.input_date_start || new Date(request.input_date) >= new Date(search.value.input_date_start)) &&
                              (!search.value.input_date_end || new Date(request.input_date) <= new Date(search.value.input_date_end));
     const matchesUpdateDate = (!search.value.update_date_start || new Date(request.update_date) >= new Date(search.value.update_date_start)) &&
                               (!search.value.update_date_end || new Date(request.update_date) <= new Date(search.value.update_date_end));
 
-    return matchesContent && matchesRequesterDepartment && matchesRequesterName && matchesAssignedDepartment && matchesAssignedPerson && matchesInputDate && matchesUpdateDate;
+    return matchesContent && matchesRequesterDepartment && matchesRequesterName && matchesAssignedDepartment && matchesAssignedPerson && matchesStatus && matchesInputDate && matchesUpdateDate;
   });
 });
 
