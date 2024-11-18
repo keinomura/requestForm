@@ -2,7 +2,7 @@
   <v-container class="my-2">
     <v-card>
       <v-card-title>
-        要望一覧
+        要望一覧{{ isSearchDialogOpen }}
         <v-spacer></v-spacer>
         <!-- 検索ボタンの追加 -->
         <v-btn color="primary" @click="isSearchDialogOpen = true">検索</v-btn>
@@ -243,12 +243,14 @@ const passForDelete = 'del3377'
 const updatePassword = ref('');
 const passForUpdate = 'del3377'
 
-const previousStatus = ref('');
+// 進捗更新
+const previousStatus = ref(''); //statusが電子カルテ委員会承認を判断するための変数
+const currentRequest = ref({}); // 進捗更新用のデータ
 
-
-const currentRequest = ref({});
+// 詳細コメント表示
 const comments = ref([]);
 
+// 一覧表示用データ取得
 const fetchRequests = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:5000/requests');
@@ -275,6 +277,13 @@ const fetchRequests = async () => {
     console.error("APIからのデータ取得に失敗しました:", error);
   }
 };
+
+const searchRequests = () => {
+  // 検索ロジックは既にfilteredRequestsで実装されているため、ここではダイアログを閉じるだけです
+  isSearchDialogOpen.value = false;
+};
+
+
 
 // 詳細ダイアログ処理
 const viewDetails = async (id) => {
