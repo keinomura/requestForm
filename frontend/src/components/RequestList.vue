@@ -33,7 +33,7 @@
           <v-form ref="form">
             <v-select
               v-model="currentRequest.status"
-              :items="statusOptions"
+              :items="filteredStatusOptions"
               label="対応状況"
               required
             ></v-select>
@@ -128,7 +128,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import axios from 'axios';
 import { useRoute } from 'vue-router';
 import { defineProps } from 'vue';
@@ -170,6 +170,14 @@ const statusOptions = [
   '対応保留',
   '対応不可'
 ];
+
+const filteredStatusOptions = computed(() => {
+  if (props.isAdminMode) {
+    return statusOptions;
+  } else {
+    return statusOptions.filter(option => option !== '対応完了（電カル委員会承認）');
+  }
+});
 
 const requests = ref([]);
 const isDialogOpen = ref(false);
