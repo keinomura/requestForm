@@ -18,7 +18,8 @@ db = SQLAlchemy(app)
 # モデルの定義
 class Request(db.Model):
     __tablename__ = 'Requests'
-    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String, primary_key=True)  # UUIDを使用するためにString型に変更
+    id = db.Column(db.Integer, autoincrement=True)  # 表示用のインクリメントID
     content = db.Column(db.Text, nullable=False)
     requester_department = db.Column(db.String(255))
     requester_name = db.Column(db.String(255))
@@ -46,12 +47,12 @@ class Response(db.Model):
 with app.app_context():
     db.create_all()
 
-# テストデータの追加（必要に応じて）
-with app.app_context():
-    if Request.query.count() == 0:
-        test_request = Request(requester_name="山田太郎", content="新しい機能を追加してください")
-        db.session.add(test_request)
-        db.session.commit()
+# # テストデータの追加（必要に応じて）
+# with app.app_context():
+#     if Request.query.count() == 0:
+#         test_request = Request(requester_name="山田太郎", content="新しい機能を追加してください")
+#         db.session.add(test_request)
+#         db.session.commit()
 
 # 新しい要望を追加するAPI
 @app.route('/requests', methods=['POST'])
@@ -60,6 +61,7 @@ def add_request():
     if 'requester_department' not in data:
         return jsonify({'error': 'requester_department is required'}), 400
     new_request = Request(
+        uuid=data['uuid'],
         content=data['content'],
         requester_department=data['requester_department'],
         requester_name=data['requester_name']
@@ -68,6 +70,7 @@ def add_request():
     db.session.commit()
     return jsonify({'message': '新しい要望が追加されました'}), 201
 
+# 新しい対応を追加するAPI
 @app.route('/responses', methods=['POST'])
 def add_response():
     data = request.get_json()

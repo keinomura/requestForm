@@ -2,7 +2,7 @@
   <v-container class="my-2">
     <v-card>
       <v-card-title>
-        要望一覧{{ isSearchDialogOpen }}
+        要望一覧
         <v-spacer></v-spacer>
         <!-- 検索ボタンの追加 -->
         <v-btn color="primary" @click="isSearchDialogOpen = true">検索</v-btn>
@@ -60,7 +60,7 @@
         :headers="headers"
         :items="filteredRequests"
         class="elevation-1"
-        item-key="id"
+        item-key="uuid"
         dense
         :item-class="getRowClass"
       >
@@ -187,7 +187,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-// import { useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { defineProps } from 'vue';
 
 const props = defineProps({
@@ -195,7 +195,7 @@ const props = defineProps({
 });
 
 const headers = [
-  { title: 'ID', key: 'id' },
+  { title: 'ID', key: 'id' },  // 表示用のインクリメントID
   { title: '内容', key: 'content' },
   { title: '部署', key: 'requester_department' },
   { title: '氏名', key: 'requester_name' },
@@ -318,8 +318,6 @@ const searchRequests = () => {
   isSearchDialogOpen.value = false;
 };
 
-
-
 // 詳細ダイアログ処理
 const viewDetails = async (id) => {
   try {
@@ -367,7 +365,7 @@ const updateProgress = async () => {
   try {
     currentRequest.value.update_date = new Date()
     console.log('保存' + currentRequest.value.update_date)
-    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`, currentRequest.value);
+    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.uuid}`, currentRequest.value);
     fetchRequests(); // 更新後にリストを再取得
     closeDialog();
     closePasswordDialog();
@@ -394,7 +392,7 @@ const deleteRequest = async () => {
   }
 
   try {
-    await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.id}`);
+    await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.uuid}`);
     alert('要望が削除されました');
     fetchRequests();
     closeDeleteDialog();
