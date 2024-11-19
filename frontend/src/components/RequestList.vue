@@ -145,9 +145,9 @@
           <v-list>
             <v-list-item v-for="comment in comments" :key="comment.response_date">
               <v-list-item-content>
-                <v-list-item-title>{{ comment.handler_name }} ({{ comment.handler_department }})</v-list-item-title>
-                <v-list-item-subtitle>{{ comment.response_comment }}</v-list-item-subtitle>
-                <v-list-item-subtitle>更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+                <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
+                <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+                <v-list-item-subtitle></v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
           </v-list>

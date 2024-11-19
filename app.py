@@ -170,9 +170,9 @@ def get_request_comments(uuid):
     return jsonify(comments)
 
 #リクエストの削除API
-@app.route('/requests/<int:id>', methods=['DELETE'])
-def delete_request(id):
-    request_item = Request.query.get(id)
+@app.route('/requests/<uuid>', methods=['DELETE'])
+def delete_request(uuid):
+    request_item = Request.query.get(uuid)
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
