@@ -20,7 +20,7 @@ db = SQLAlchemy(app)
 # 要望についての情報を格納するRequestテーブルと、対応についての情報を格納するResponseテーブルを定義
 class Request(db.Model): # 要望についての情報を格納するRequestテーブル
     __tablename__ = 'Requests'
-    request_uuid = db.Column(db.String, primary_key=True)  # UUIDを使用するためにString型に変更
+    request_uuid = db.Column(db.String, primary_key=True)  # UUIDを使用するためにString型に変更:TODO:こちらでuuid生成でもいいかも。
     request_id = db.Column(db.Integer, autoincrement=True)  # 表示用のインクリメントID
     content = db.Column(db.Text, nullable=False)
     requester_department = db.Column(db.String(255))
@@ -35,7 +35,7 @@ class Request(db.Model): # 要望についての情報を格納するRequestテ�
 class Response(db.Model): # 対応についての情報を格納するResponseテーブル
     __tablename__ = 'Responses'
     response_uuid = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
-    response_id = db.Column(db.Integer,  autoincrement=True, nullable=True) # 自動インクリメントに設定
+    response_id = db.Column(db.Integer, unique=True, auto_increment=True)  # 自動インクリメントに設定
     request_uuid = db.Column(db.String, db.ForeignKey('Requests.request_uuid'))  # UUIDを使用するためにString型に変更
     handler_company = db.Column(db.String(255))
     handler_department = db.Column(db.String(255))
@@ -50,13 +50,7 @@ class Response(db.Model): # 対応についての情報を格納するResponse�
 with app.app_context():
     db.create_all()
 
-# # テストデータの追加（必要に応じて）
-# with app.app_context():
-#     if Request.query.count() == 0:
-#         test_request = Request(requester_name="山田太郎", content="新しい機能を追加してください")
-#         db.session.add(test_request)
-#         db.session.commit()
-
+## 要望 Requests
 # 新しい要望を追加するAPI
 @app.route('/requests', methods=['POST'])
 def add_request():

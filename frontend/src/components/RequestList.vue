@@ -1,11 +1,12 @@
 <template>
   <v-container class="my-2">
     <v-card>
+      
       <v-card-title>
-        要望一覧
-        <v-spacer></v-spacer>
-        <!-- 検索ボタンの追加 -->
-        <v-btn color="primary" @click="isSearchDialogOpen = true">検索</v-btn>
+          要望一覧
+          <v-btn icon @click="isSearchDialogOpen = true" class="mx-10">
+            <v-icon>mdi-magnify</v-icon>
+          </v-btn>
       </v-card-title>
       <!-- 検索フォームのダイアログ -->
       <v-dialog v-model="isSearchDialogOpen" max-width="600px">
@@ -148,31 +149,14 @@
                     <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
                     <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
                   </v-col>
-                  <v-col cols="2">
+                  <v-col cols="2" v-if="isAdminMode">
                     <v-btn icon @click="openDeleteCommentDialog(comment.response_uuid)">
-                    <!-- <v-btn icon @click="deleteComment(comment.response_uuid)"> -->
                       <v-icon color="red">mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
                 </v-row>
               </v-list-item-content>
             </v-list-item>
-
-        <!-- <v-card-text>
-          <v-list>
-            <v-list-item v-for="comment in comments" :key="comment.response_date">
-              <v-list-item-content>
-                <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
-                <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
-              </v-list-item-content>
-              <v-list-item-action v-if="isAdminMode">
-                <v-btn icon @click="deleteComment(comment.id)">
-                  <v-icon color="red">mdi-delete</v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>
-          </v-list>
-        </v-card-text> -->
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeCommentsDialog">閉じる</v-btn>
@@ -235,7 +219,7 @@ const props = defineProps({
 });
 
 const headers = [
-  { title: 'ID', key: 'id' },  // 表示用のインクリメントID
+  { title: 'ID', key: 'request_id' },  // 表示用のインクリメントID
   { title: '内容', key: 'content' },
   { title: '部署', key: 'requester_department' },
   { title: '氏名', key: 'requester_name' },

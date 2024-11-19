@@ -3,9 +3,18 @@
     <v-app-bar app color="primary" dark>
       <v-toolbar-title>要望管理システム</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn text to="/">要望一覧</v-btn>
-      <v-btn text to="/add-request">新規要望の追加</v-btn>
-      <v-btn text @click="toggleMode">{{ isAdminMode ? '閲覧入力モードへ移動' : '管理用へ移動' }}</v-btn>
+      <v-btn text to="/">
+        <v-icon left>mdi-view-list</v-icon>
+        一覧
+      </v-btn>
+      <v-btn text to="/add-request">
+        <v-icon left>mdi-plus-box</v-icon>
+        新規追加
+      </v-btn>
+      <v-btn text @click="toggleMode">
+        <v-icon left>{{ isAdminMode ? 'mdi-eye' : 'mdi-account' }}</v-icon>
+        {{ isAdminMode ? '閲覧入力モードへ移動' : '管理用へ移動' }}
+      </v-btn>
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main class="main-content">
