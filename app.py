@@ -120,7 +120,7 @@ def get_requests():
         })
     return jsonify(output)
 
-# 進捗情報の更新API　:TODO: 進捗情報の更新APIを実装してください日付がうまくいきません。
+# 進捗情報の更新API　
 @app.route('/requests/<request_uuid>', methods=['PUT'])
 def update_request(request_uuid):
     data = request.json
@@ -163,6 +163,7 @@ def get_request_comments(request_uuid):
     comments = []
     for response in responses:
         comments.append({
+            'response_uuid': response.response_uuid,
             'handler_department': response.handler_department,
             'handler_name': response.handler_name,
             'status': response.status,
@@ -184,9 +185,9 @@ def delete_request(request_uuid):
     return jsonify({"message": "Request deleted successfully"}), 200
 
 # コメントの削除API
-@app.route('/comments/<int:id>', methods=['DELETE'])
-def delete_comment(id):
-    comment = Response.query.get(id)
+@app.route('/comments/<response_uuid>', methods=['DELETE'])
+def delete_comment(response_uuid):
+    comment = Response.query.filter_by(response_uuid=response_uuid).first()
     if not comment:
         return jsonify({"error": "Comment not found"}), 404
 

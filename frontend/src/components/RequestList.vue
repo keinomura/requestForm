@@ -141,22 +141,22 @@
     <v-dialog v-model="isCommentsDialogOpen" max-width="600px">
       <v-card>
         <v-card-title>コメント一覧</v-card-title>
-        <v-row>
-          <v-col cols="1"></v-col>
-          <v-col cols="9">
             <v-list-item v-for="comment in comments" :key="comment.response_date">
               <v-list-item-content>
-                <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
-                <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+                <v-row>
+                  <v-col cols="10">
+                    <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-btn icon @click="deleteComment(comment.response_uuid)">
+                      <v-icon color="red">mdi-delete</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
               </v-list-item-content>
             </v-list-item>
-          </v-col>
-          <v-col cols="2" v-if="isAdminMode">
-            <v-btn icon @click="deleteComment(comment.id)">
-              <v-icon color="red">mdi-delete</v-icon>
-            </v-btn>
-          </v-col>
-        </v-row>
+
         <!-- <v-card-text>
           <v-list>
             <v-list-item v-for="comment in comments" :key="comment.response_date">
@@ -436,9 +436,9 @@ const closePasswordDialog = () => {
 };
 
 // コメントの削除処理
-const deleteComment = async (id) => {
+const deleteComment = async (response_uuid) => {
   try {
-    await axios.delete(`http://127.0.0.1:5000/comments/${id}`);
+    await axios.delete(`http://127.0.0.1:5000/comments/${response_uuid}`);
     alert('コメントが削除されました');
     viewDetails(currentRequest.value.request_uuid); // コメント削除後にコメント一覧を再取得
   } catch (error) {
