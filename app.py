@@ -150,13 +150,13 @@ def update_request(uuid):
 
 
 # 特定のリクエストに関連するコメントを取得するAPI
-@app.route('/requests/<int:id>/comments', methods=['GET'])
-def get_request_comments(id):
-    request_item = Request.query.get(id)
+@app.route('/requests/<uuid>/comments', methods=['GET'])
+def get_request_comments(uuid):
+    request_item = Request.query.filter_by(uuid=uuid).first()
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
-    responses = Response.query.filter_by(request_id=id).all()
+    responses = Response.query.filter_by(request_id=uuid).all()
     comments = []
     for response in responses:
         comments.append({

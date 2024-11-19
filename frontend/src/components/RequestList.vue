@@ -68,7 +68,7 @@
           <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn color="primary" @click="viewDetails(item.id)">詳細を見る</v-btn>
+          <v-btn color="primary" @click="viewDetails(item.uuid)">詳細を見る</v-btn>
           <v-btn
             color="secondary"
             @click="openUpdateDialog(item)"
@@ -319,9 +319,9 @@ const searchRequests = () => {
 };
 
 // 詳細ダイアログ処理
-const viewDetails = async (id) => {
+const viewDetails = async (uuid) => {
   try {
-    const response = await axios.get(`http://127.0.0.1:5000/requests/${id}/comments`);
+    const response = await axios.get(`http://127.0.0.1:5000/requests/${uuid}/comments`);
     comments.value = response.data.map(comment => {
       return {
         ...comment,
