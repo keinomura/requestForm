@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -8,7 +9,9 @@ app = Flask(__name__)
 # CORS(app)
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///request_management.db'
+# プロジェクトディレクトリに対する相対パスを使用してデータベースファイルのパスを設定
+db_path = os.path.join(os.path.dirname(__file__), '.', 'request_management.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
