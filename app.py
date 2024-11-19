@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime, timedelta
+import uuid
 
 app = Flask(__name__)
 # CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # 全てのオリジンを許可
@@ -16,10 +17,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # モデルの定義
-class Request(db.Model):
+# 要望についての情報を格納するRequestテーブルと、対応についての情報を格納するResponseテーブルを定義
+class Request(db.Model): # 要望についての情報を格納するRequestテーブル
     __tablename__ = 'Requests'
-    uuid = db.Column(db.String, primary_key=True)  # UUIDを使用するためにString型に変更
-    id = db.Column(db.Integer, autoincrement=True)  # 表示用のインクリメントID
+    request_uuid = db.Column(db.String, primary_key=True)  # UUIDを使用するためにString型に変更
+    request_id = db.Column(db.Integer, autoincrement=True)  # 表示用のインクリメントID
     content = db.Column(db.Text, nullable=False)
     requester_department = db.Column(db.String(255))
     requester_name = db.Column(db.String(255))
@@ -30,10 +32,11 @@ class Request(db.Model):
     assigned_person = db.Column(db.String(255))
     update_date = db.Column(db.DateTime, default=db.func.current_timestamp())
 
-class Response(db.Model):
+class Response(db.Model): # 対応についての情報を格納するResponseテーブル
     __tablename__ = 'Responses'
-    id = db.Column(db.Integer, primary_key=True)
-    request_id = db.Column(db.String, db.ForeignKey('Requests.uuid'))  # UUIDを使用するためにString型に変更
+    response_uuid = db.Column(db.String, unique=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
+    response_id = db.Column(db.Integer, primary_key=True, autoincrement=True) # 自動インクリメントに設定
+    request_uuid = db.Column(db.String, db.ForeignKey('Requests.request_uuid'))  # UUIDを使用するためにString型に変更
     handler_company = db.Column(db.String(255))
     handler_department = db.Column(db.String(255))
     handler_name = db.Column(db.String(255))
@@ -61,7 +64,7 @@ def add_request():
     if 'requester_department' not in data:
         return jsonify({'error': 'requester_department is required'}), 400
     new_request = Request(
-        uuid=data['uuid'],
+        request_uuid=data['request_uuid'],
         content=data['content'],
         requester_department=data['requester_department'],
         requester_name=data['requester_name']
@@ -80,7 +83,7 @@ def add_response():
     final_response_date = datetime.fromisoformat(data['final_response_date']) if 'final_response_date' in data else None
     
     new_response = Response(
-        request_id=data['request_id'],
+        request_uuid=data['request_uuid'],
         handler_company=data.get('handler_company', ''),
         handler_department=data.get('handler_department', ''),
         handler_name=data.get('handler_name', ''),
@@ -101,8 +104,8 @@ def get_requests():
     output = []
     for request_item in requests:
         output.append({
-            'uuid': request_item.uuid,
-            'id': request_item.id,
+            'request_uuid': request_item.request_uuid,
+            'request_id': request_item.request_id,
             'content': request_item.content,
             'requester_department': request_item.requester_department,
             'requester_name': request_item.requester_name,
@@ -118,10 +121,10 @@ def get_requests():
     return jsonify(output)
 
 # 進捗情報の更新API　:TODO: 進捗情報の更新APIを実装してください日付がうまくいきません。
-@app.route('/requests/<uuid>', methods=['PUT'])
-def update_request(uuid):
+@app.route('/requests/<request_uuid>', methods=['PUT'])
+def update_request(request_uuid):
     data = request.json
-    request_item = Request.query.get(uuid)
+    request_item = Request.query.filter_by(request_uuid=request_uuid).first()
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
@@ -137,7 +140,7 @@ def update_request(uuid):
 
     # Responseテーブルに新しいコメントを追加
     new_response = Response(
-        request_id=uuid,
+        request_uuid=request_uuid,
         handler_department=data.get('assigned_department', ''),
         handler_name=data.get('assigned_person', ''),
         status=data.get('status', '未対応'),
@@ -150,13 +153,13 @@ def update_request(uuid):
 
 
 # 特定のリクエストに関連するコメントを取得するAPI
-@app.route('/requests/<uuid>/comments', methods=['GET'])
-def get_request_comments(uuid):
-    request_item = Request.query.filter_by(uuid=uuid).first()
+@app.route('/requests/<request_uuid>/comments', methods=['GET'])
+def get_request_comments(request_uuid):
+    request_item = Request.query.filter_by(request_uuid=request_uuid).first()
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
-    responses = Response.query.filter_by(request_id=uuid).all()
+    responses = Response.query.filter_by(request_uuid=request_uuid).all()
     comments = []
     for response in responses:
         comments.append({
@@ -170,9 +173,9 @@ def get_request_comments(uuid):
     return jsonify(comments)
 
 #リクエストの削除API
-@app.route('/requests/<uuid>', methods=['DELETE'])
-def delete_request(uuid):
-    request_item = Request.query.get(uuid)
+@app.route('/requests/<request_uuid>', methods=['DELETE'])
+def delete_request(request_uuid):
+    request_item = Request.query.get(request_uuid)
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
@@ -180,7 +183,16 @@ def delete_request(uuid):
     db.session.commit()
     return jsonify({"message": "Request deleted successfully"}), 200
 
+# コメントの削除API
+@app.route('/comments/<int:id>', methods=['DELETE'])
+def delete_comment(id):
+    comment = Response.query.get(id)
+    if not comment:
+        return jsonify({"error": "Comment not found"}), 404
 
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({"message": "Comment deleted successfully"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

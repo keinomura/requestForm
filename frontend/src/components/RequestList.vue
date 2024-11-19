@@ -60,7 +60,7 @@
         :headers="headers"
         :items="filteredRequests"
         class="elevation-1"
-        item-key="uuid"
+        item-key="request_uuid"
         dense
         :item-class="getRowClass"
       >
@@ -68,7 +68,7 @@
           <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
         </template>
         <template v-slot:[`item.actions`]="{ item }">
-          <v-btn color="primary" @click="viewDetails(item.uuid)">詳細を見る</v-btn>
+          <v-btn color="primary" @click="viewDetails(item.request_uuid)">詳細を見る</v-btn>
           <v-btn
             color="secondary"
             @click="openUpdateDialog(item)"
@@ -141,17 +141,37 @@
     <v-dialog v-model="isCommentsDialogOpen" max-width="600px">
       <v-card>
         <v-card-title>コメント一覧</v-card-title>
-        <v-card-text>
+        <v-row>
+          <v-col cols="1"></v-col>
+          <v-col cols="9">
+            <v-list-item v-for="comment in comments" :key="comment.response_date">
+              <v-list-item-content>
+                <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
+                <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </v-col>
+          <v-col cols="2" v-if="isAdminMode">
+            <v-btn icon @click="deleteComment(comment.id)">
+              <v-icon color="red">mdi-delete</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+        <!-- <v-card-text>
           <v-list>
             <v-list-item v-for="comment in comments" :key="comment.response_date">
               <v-list-item-content>
                 <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
                 <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
-                <v-list-item-subtitle></v-list-item-subtitle>
               </v-list-item-content>
+              <v-list-item-action v-if="isAdminMode">
+                <v-btn icon @click="deleteComment(comment.id)">
+                  <v-icon color="red">mdi-delete</v-icon>
+                </v-btn>
+              </v-list-item-action>
             </v-list-item>
           </v-list>
-        </v-card-text>
+        </v-card-text> -->
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeCommentsDialog">閉じる</v-btn>
@@ -319,9 +339,9 @@ const searchRequests = () => {
 };
 
 // 詳細ダイアログ処理
-const viewDetails = async (uuid) => {
+const viewDetails = async (request_uuid) => {
   try {
-    const response = await axios.get(`http://127.0.0.1:5000/requests/${uuid}/comments`);
+    const response = await axios.get(`http://127.0.0.1:5000/requests/${request_uuid}/comments`);
     comments.value = response.data.map(comment => {
       return {
         ...comment,
@@ -366,7 +386,7 @@ const updateProgress = async () => {
 
   try {
     currentRequest.value.update_date = new Date()
-    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.uuid}`, currentRequest.value);
+    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.request_uuid}`, currentRequest.value);
     fetchRequests(); // 更新後にリストを再取得
     closeDialog();
     closePasswordDialog();
@@ -393,7 +413,7 @@ const deleteRequest = async () => {
   }
 
   try {
-    await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.uuid}`);
+    await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.request_uuid}`);
     alert('要望が削除されました');
     fetchRequests();
     closeDeleteDialog();
@@ -415,16 +435,18 @@ const closePasswordDialog = () => {
   isPasswordDialogOpen.value = false;
 };
 
+// コメントの削除処理
+const deleteComment = async (id) => {
+  try {
+    await axios.delete(`http://127.0.0.1:5000/comments/${id}`);
+    alert('コメントが削除されました');
+    viewDetails(currentRequest.value.request_uuid); // コメント削除後にコメント一覧を再取得
+  } catch (error) {
+    console.error('コメントの削除に失敗しました:', error);
+    alert('コメントの削除に失敗しました');
+  }
+};
 
-
-
-
-// const getRowClass = (item) => {
-//   if (item.status === '未対応') return 'status-pending';
-//   if (item.status === '対応中') return 'status-in-progress';
-//   if (item.status === '完了') return 'status-completed';
-//   return '';
-// };
 
 
 
