@@ -34,8 +34,8 @@ class Request(db.Model): # 要望についての情報を格納するRequestテ�
 
 class Response(db.Model): # 対応についての情報を格納するResponseテーブル
     __tablename__ = 'Responses'
-    response_uuid = db.Column(db.String, unique=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
-    response_id = db.Column(db.Integer, primary_key=True, autoincrement=True) # 自動インクリメントに設定
+    response_uuid = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
+    response_id = db.Column(db.Integer,  autoincrement=True, nullable=True) # 自動インクリメントに設定
     request_uuid = db.Column(db.String, db.ForeignKey('Requests.request_uuid'))  # UUIDを使用するためにString型に変更
     handler_company = db.Column(db.String(255))
     handler_department = db.Column(db.String(255))
