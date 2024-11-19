@@ -18,37 +18,62 @@
 </template>
   
   
-  <script>
-  import axios from 'axios';
-  
-  export default {
-    data() {
-      return {
-        content: '',
-        requester_department: '',
-        requester_name: ''
-      };
-    },
-    methods: {
-      async submitRequest() {
-        try {
-          await axios.post('http://127.0.0.1:5000/requests', {
-            content: this.content,
-            requester_department: this.requester_department,
-            requester_name: this.requester_name
-          });
-          alert('要望が追加されました');
-          this.content = '';
-          this.requester_department = '';
-          this.requester_name = '';
-        } catch (error) {
-          console.error('エラーが発生しました:', error);
-          alert('要望の追加に失敗しました');
-        }
-      }
-    }
-  };
-  </script>
+<script setup>
+import { ref } from 'vue';
+import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
+
+const content = ref('');
+const requester_department = ref('');
+const requester_name = ref('');
+// const router = useRouter();
+
+const submitRequest = async () => {
+  try {
+    await axios.post('http://127.0.0.1:5000/requests', {
+      id: uuidv4(), // UUIDを生成してIDとして使用
+      content: content.value,
+      requester_department: requester_department.value,
+      requester_name: requester_name.value,
+      // input_date: new Date().toISOString(),
+      // status: '未対応',
+      // response_comment: '',
+      // assigned_department: '',
+      // assigned_person: '',
+      // update_date: new Date().toISOString()
+    });
+    alert('要望が追加されました');
+    content.value = '';
+    requester_department.value = '';
+    requester_name.value = '';
+    // router.push('/');
+  } catch (error) {
+    console.error('エラーが発生しました:', error);
+    alert('要望の追加に失敗しました');
+  }
+};
+
+
+  //   methods: {
+  //     async submitRequest() {
+  //       try {
+  //         await axios.post('http://127.0.0.1:5000/requests', {
+  //           content: this.content,
+  //           requester_department: this.requester_department,
+  //           requester_name: this.requester_name
+  //         });
+  //         alert('要望が追加されました');
+  //         this.content = '';
+  //         this.requester_department = '';
+  //         this.requester_name = '';
+  //       } catch (error) {
+  //         console.error('エラーが発生しました:', error);
+  //         alert('要望の追加に失敗しました');
+  //       }
+  //     }
+  //   }
+  // };
+  </script setup>
   
   <style scoped>
   .container {
