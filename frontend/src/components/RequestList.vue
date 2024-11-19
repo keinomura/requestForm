@@ -149,7 +149,8 @@
                     <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
                   </v-col>
                   <v-col cols="2">
-                    <v-btn icon @click="deleteComment(comment.response_uuid)">
+                    <v-btn icon @click="openDeleteCommentDialog(comment.response_uuid)">
+                    <!-- <v-btn icon @click="deleteComment(comment.response_uuid)"> -->
                       <v-icon color="red">mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
@@ -197,6 +198,25 @@
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDeleteDialog">キャンセル</v-btn>
           <v-btn color="red" text @click="deleteRequest">削除</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="isDeleteCommentDialogOpen" max-width="500px">
+      <v-card>
+        <v-card-title>コメントの削除</v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="deleteCommentPassword"
+            label="削除用パスワードを入力してください"
+            type="password"
+            required
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1" text @click="closeDeleteCommentDialog">キャンセル</v-btn>
+          <v-btn color="red" text @click="confirmDeleteComment">削除</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -297,6 +317,7 @@ const deletePassword = ref('');
 const passForDelete = 'del3377'
 const updatePassword = ref('');
 const passForUpdate = 'del3377'
+const passForDeleteComment = 'del3377'
 
 // 進捗更新
 const previousStatus = ref(''); //statusが電子カルテ委員会承認を判断するための変数
@@ -304,6 +325,13 @@ const currentRequest = ref({}); // 進捗更新用のデータ
 
 // 詳細コメント表示
 const comments = ref([]);
+
+//コメント削除
+// const deletePassword = ref('');
+const deleteCommentPassword = ref('');
+const deleteCommentUuid = ref('');
+const isDeleteCommentDialogOpen = ref(false)
+
 
 // 一覧表示用データ取得
 const fetchRequests = async () => {
@@ -436,11 +464,29 @@ const closePasswordDialog = () => {
 };
 
 // コメントの削除処理
-const deleteComment = async (response_uuid) => {
+const openDeleteCommentDialog = (response_uuid) => {
+  deleteCommentUuid.value = response_uuid;
+  isDeleteCommentDialogOpen.value = true;
+};
+
+const closeDeleteCommentDialog = () => {
+  isDeleteCommentDialogOpen.value = false;
+};
+
+const confirmDeleteComment = async () => {
   try {
-    await axios.delete(`http://127.0.0.1:5000/comments/${response_uuid}`);
+    // パスワードチェックをここで行う（例: パスワードが "admin" であることを確認）
+    if (deleteCommentPassword.value !== passForDeleteComment) {
+      alert('パスワードが正しくありません');
+      return;
+    }
+
+    await axios.delete(`http://127.0.0.1:5000/comments/${deleteCommentUuid.value}`);
     alert('コメントが削除されました');
+    //コメント一覧に戻る。コメントが何もなければ要望一覧画面に戻る。
     viewDetails(currentRequest.value.request_uuid); // コメント削除後にコメント一覧を再取得
+    closeDeleteCommentDialog();
+    
   } catch (error) {
     console.error('コメントの削除に失敗しました:', error);
     alert('コメントの削除に失敗しました');
