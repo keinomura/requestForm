@@ -185,21 +185,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+// import { useRoute } from 'vue-router';
 import { defineProps } from 'vue';
 
 const props = defineProps({
   isAdminMode: Boolean
 });
-
-const route = useRoute();
-// const isAdminMode = ref(route.params.isAdminMode || false);
-
-// watch(() => route.params.isAdminMode, (newVal) => {
-//   isAdminMode.value = newVal;
-// });
 
 const headers = [
   { title: 'ID', key: 'id' },
@@ -256,15 +249,6 @@ const menu2 = ref(false);
 const menu3 = ref(false);
 const menu4 = ref(false);
 
-const formatDate = (date) => {
-  if (!date) return '';
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = (`0${d.getMonth() + 1}`).slice(-2);
-  const day = (`0${d.getDate()}`).slice(-2);
-  return `${year}/${month}/${day}`;
-};
-
 const filteredRequests = computed(() => {
   return requests.value.filter(request => {
     const matchesContent = request.content?.includes(search.value.content) ?? true;
@@ -274,7 +258,7 @@ const filteredRequests = computed(() => {
     const matchesAssignedPerson = request.assigned_person?.includes(search.value.assigned_person) ?? true;
     const matchesStatus = search.value.status.length === 0 || search.value.status.includes(request.status);
     const matchesInputDate = (!search.value.input_date_start || new Date(request.input_date) >= new Date(search.value.input_date_start)) &&
-                             (!search.value.input_date_end || new Date(request.input_date) <= new Date(search.value.input_date_end));
+                              (!search.value.input_date_end || new Date(request.input_date) <= new Date(search.value.input_date_end));
     const matchesUpdateDate = (!search.value.update_date_start || new Date(request.update_date) >= new Date(search.value.update_date_start)) &&
                               (!search.value.update_date_end || new Date(request.update_date) <= new Date(search.value.update_date_end));
 
