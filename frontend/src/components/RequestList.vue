@@ -349,6 +349,8 @@ const openUpdateDialog = (item) => {
   currentRequest.value = { ...item };
   previousStatus.value = item.status; // 現在のステータスを保存
   updatePassword.value = ''; // パスワードフィールドをリセット
+  console.log(currentRequest.value); // currentRequestオブジェクトの内容を確認
+
   isDialogOpen.value = true;
 };
 
@@ -364,7 +366,6 @@ const updateProgress = async () => {
 
   try {
     currentRequest.value.update_date = new Date()
-    console.log('保存' + currentRequest.value.update_date)
     await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.uuid}`, currentRequest.value);
     fetchRequests(); // 更新後にリストを再取得
     closeDialog();

@@ -33,7 +33,7 @@ class Request(db.Model):
 class Response(db.Model):
     __tablename__ = 'Responses'
     id = db.Column(db.Integer, primary_key=True)
-    request_id = db.Column(db.Integer, db.ForeignKey('Requests.id'))
+    request_id = db.Column(db.String, db.ForeignKey('Requests.uuid'))  # UUIDを使用するためにString型に変更
     handler_company = db.Column(db.String(255))
     handler_department = db.Column(db.String(255))
     handler_name = db.Column(db.String(255))
@@ -101,6 +101,7 @@ def get_requests():
     output = []
     for request_item in requests:
         output.append({
+            'uuid': request_item.uuid,
             'id': request_item.id,
             'content': request_item.content,
             'requester_department': request_item.requester_department,
@@ -117,10 +118,10 @@ def get_requests():
     return jsonify(output)
 
 # 進捗情報の更新API　:TODO: 進捗情報の更新APIを実装してください日付がうまくいきません。
-@app.route('/requests/<int:id>', methods=['PUT'])
-def update_request(id):
+@app.route('/requests/<uuid>', methods=['PUT'])
+def update_request(uuid):
     data = request.json
-    request_item = Request.query.get(id)
+    request_item = Request.query.get(uuid)
     if not request_item:
         return jsonify({"error": "Request not found"}), 404
 
@@ -136,7 +137,7 @@ def update_request(id):
 
     # Responseテーブルに新しいコメントを追加
     new_response = Response(
-        request_id=id,
+        request_id=uuid,
         handler_department=data.get('assigned_department', ''),
         handler_name=data.get('assigned_person', ''),
         status=data.get('status', '未対応'),
