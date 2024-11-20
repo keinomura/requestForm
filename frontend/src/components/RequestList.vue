@@ -65,21 +65,27 @@
         dense
         :item-class="getRowClass"
       >
-        <template v-slot:[`item.status`]="{ item }">
-          <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
-        </template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-btn color="primary" @click="viewDetails(item.request_uuid)">詳細を見る</v-btn>
+      <template v-slot:[`item.actions`]="{ item }">
+          <v-btn color="primary" @click="viewDetails(item.request_uuid)">
+            <v-icon left>mdi-eye</v-icon>
+            詳細
+          </v-btn>
           <v-btn
             color="secondary"
             @click="openUpdateDialog(item)"
             :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
-          >進捗を入力</v-btn>
+          >
+            <v-icon left>mdi-pencil</v-icon>
+            進捗
+          </v-btn>
           <v-btn
             v-if="isAdminMode"
             color="red"
             @click="openDeleteDialog(item)"
-          >削除</v-btn>
+          >
+            <v-icon left>mdi-delete</v-icon>
+            
+          </v-btn>
         </template>
       </v-data-table>
     </v-card>
