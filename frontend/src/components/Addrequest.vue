@@ -10,8 +10,15 @@
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="submitRequest">追加</v-btn>
-          <v-btn text @click="$router.push('/')" style="background-color: blueviolet;">キャンセル</v-btn>
+          <v-spacer></v-spacer>
+        <v-btn text color="blue darken-1" @click="$router.push('/')">
+          <v-icon left>mdi-cancel</v-icon>
+          キャンセル
+        </v-btn>
+        <v-btn text color="primary" @click="submitRequest">
+          <v-icon left>mdi-plus-box</v-icon>
+          追加
+        </v-btn>
         </v-card-actions>
       </v-card>
     </v-container>
@@ -21,7 +28,6 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-// import { v4 as uuidv4 } from 'uuid';
 
 const content = ref('');
 const requester_department = ref('');
@@ -46,9 +52,8 @@ const submitRequest = async () => {
   }
 };
 
-  </script>
-  
-  <style scoped>
+</script>
+<style scoped>
   .container {
     max-width: 600px;
     margin: 0 auto;
@@ -61,33 +66,22 @@ const submitRequest = async () => {
   .form-group {
     margin-bottom: 15px;
   }
-  
+
   label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
   }
-  
+
   input[type="text"] {
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
   }
-  
-  button {
-  padding: 10px 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 10px;
-}
 
-button:hover {
-  background-color: #0056b3;
-}
+  button:hover {
+    background-color: #0056b3;
+  }
 
-  </style>
-  
+</style>
