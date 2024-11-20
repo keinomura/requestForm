@@ -21,7 +21,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 
 const content = ref('');
 const requester_department = ref('');
@@ -31,7 +31,7 @@ const router = useRouter();
 const submitRequest = async () => {
   try {
     await axios.post('http://127.0.0.1:5000/requests', {
-      request_uuid: uuidv4(), // UUIDを生成してUUIDとして使用
+      // request_uuid: uuidv4(), // UUIDを生成してUUIDとして使用
       content: content.value,
       requester_department: requester_department.value,
       requester_name: requester_name.value,
