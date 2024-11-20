@@ -31,7 +31,6 @@ const router = useRouter();
 const submitRequest = async () => {
   try {
     await axios.post('http://127.0.0.1:5000/requests', {
-      // request_uuid: uuidv4(), // UUIDを生成してUUIDとして使用
       content: content.value,
       requester_department: requester_department.value,
       requester_name: requester_name.value,
