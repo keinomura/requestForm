@@ -73,11 +73,25 @@
         item-key="request_uuid"
         dense
         :item-class="getRowClass"
+        item-value="request_uuid"
+        show-expand
       >
-      <template v-slot:[`item.status`]="{ item }">
-        <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
+        <template v-slot:[`item.status`]="{ item }">
+          <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
+        </template>
+        <!-- <template v-slot:top>
+          <v-toolbar flat>
+            <v-toolbar-title>Expandable Table</v-toolbar-title>
+          </v-toolbar>
+        </template> -->
+        <template v-slot:expanded-row="{ columns, item }">
+          <tr>
+            <td :colspan="columns.length">
+              More info about {{ item.name }}
+            </td>
+          </tr>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
           <v-btn color="primary" @click="viewDetails(item.request_uuid)">
             <v-icon left>mdi-eye</v-icon>
             詳細
@@ -96,7 +110,6 @@
             @click="openDeleteDialog(item)"
           >
             <v-icon left>mdi-delete</v-icon>
-            
           </v-btn>
         </template>
       </v-data-table>
@@ -261,6 +274,7 @@ const headers = [
   { title: '氏名', key: 'requester_name' },
   { title: '登録日時', key: 'input_date' },
   { title: '対応状況', key: 'status' },
+  { title: '', key: 'data-table-expand'},
   { title: '最新コメント', key: 'response_comment' },
   { title: '更新日時', key: 'update_date' },
   { title: '担当部署', key: 'assigned_department' },
