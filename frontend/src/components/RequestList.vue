@@ -65,6 +65,9 @@
         dense
         :item-class="getRowClass"
       >
+      <template v-slot:[`item.status`]="{ item }">
+        <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
+      </template>
       <template v-slot:[`item.actions`]="{ item }">
           <v-btn color="primary" @click="viewDetails(item.request_uuid)">
             <v-icon left>mdi-eye</v-icon>
@@ -120,8 +123,14 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDialog">キャンセル</v-btn>
-          <v-btn color="blue darken-1" text @click="checkPassword">更新</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDialog">
+            <v-icon left>mdi-cancel</v-icon>
+            キャンセル
+          </v-btn>
+          <v-btn color="blue darken-1" text @click="checkPassword">
+            <v-icon left>mdi-check</v-icon>
+            更新
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -165,7 +174,10 @@
             </v-list-item>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeCommentsDialog">閉じる</v-btn>
+          <v-btn color="blue darken-1" text @click="closeCommentsDialog">
+            <v-icon left>mdi-cancel</v-icon>
+            閉じる
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -174,7 +186,6 @@
       <v-card>
         <v-card-title>要望の削除</v-card-title>
         <v-card-text>
-          <p>ID: {{ currentRequest.request_id }}</p>
           <p>内容: {{ currentRequest.content }}</p>
           <p>登録日: {{ currentRequest.input_date }}</p>
           <v-text-field
@@ -186,8 +197,14 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDeleteDialog">キャンセル</v-btn>
-          <v-btn color="red" text @click="deleteRequest">削除</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDeleteDialog">
+        <v-icon left>mdi-cancel</v-icon>
+        キャンセル
+      </v-btn>
+      <v-btn color="red" text @click="deleteRequest">
+        <v-icon left>mdi-delete</v-icon>
+        削除
+      </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -205,8 +222,12 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="closeDeleteCommentDialog">キャンセル</v-btn>
-          <v-btn color="red" text @click="confirmDeleteComment">削除</v-btn>
+          <v-btn color="blue darken-1" text @click="closeDeleteCommentDialog">
+            <v-icon left>mdi-cancel</v-icon>
+            キャンセル</v-btn>
+          <v-btn color="red" text @click="confirmDeleteComment">
+            <v-icon left>mdi-delete</v-icon>
+            削除</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -484,8 +505,6 @@ const confirmDeleteComment = async () => {
     alert('コメントの削除に失敗しました');
   }
 };
-
-
 
 
 const getStatusColor = (status) => {
