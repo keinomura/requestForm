@@ -6,8 +6,6 @@ from datetime import datetime, timedelta
 import uuid
 
 app = Flask(__name__)
-# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)  # 全てのオリジンを許可
-# CORS(app)
 CORS(app)
 
 # プロジェクトディレクトリに対する相対パスを使用してデータベースファイルのパスを設定
@@ -21,7 +19,6 @@ db = SQLAlchemy(app)
 class Request(db.Model): # 要望についての情報を格納するRequestテーブル
     __tablename__ = 'Requests'
     request_uuid = db.Column(db.String, primary_key=True)  # UUIDを使用するためにString型に変更:TODO:こちらでuuid生成でもいいかも。
-    request_id = db.Column(db.Integer, autoincrement=True)  # 表示用のインクリメントID
     content = db.Column(db.Text, nullable=False)
     requester_department = db.Column(db.String(255))
     requester_name = db.Column(db.String(255))
@@ -35,7 +32,7 @@ class Request(db.Model): # 要望についての情報を格納するRequestテ�
 class Response(db.Model): # 対応についての情報を格納するResponseテーブル
     __tablename__ = 'Responses'
     response_uuid = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
-    response_id = db.Column(db.Integer, unique=True, auto_increment=True)  # 自動インクリメントに設定
+    # response_id = db.Column(db.Integer, unique=True, autoincrement=True)  # 自動インクリメントに設定
     request_uuid = db.Column(db.String, db.ForeignKey('Requests.request_uuid'))  # UUIDを使用するためにString型に変更
     handler_company = db.Column(db.String(255))
     handler_department = db.Column(db.String(255))
@@ -49,6 +46,13 @@ class Response(db.Model): # 対応についての情報を格納するResponse�
 # データベースの初期化（初回のみ必要）
 with app.app_context():
     db.create_all()
+
+# テストデータの追加（必要に応じて）
+with app.app_context():
+    if Request.query.count() == 0:
+        test_request = Request(request_uuid="1", requester_name="山田太郎", content="新しい機能を追加してください")
+        db.session.add(test_request)
+        db.session.commit()
 
 ## 要望 Requests
 # 新しい要望を追加するAPI
@@ -99,7 +103,7 @@ def get_requests():
     for request_item in requests:
         output.append({
             'request_uuid': request_item.request_uuid,
-            'request_id': request_item.request_id,
+            # 'request_id': request_item.request_id,
             'content': request_item.content,
             'requester_department': request_item.requester_department,
             'requester_name': request_item.requester_name,

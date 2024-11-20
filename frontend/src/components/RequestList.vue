@@ -142,11 +142,11 @@
     <v-dialog v-model="isCommentsDialogOpen" max-width="600px">
       <v-card>
         <v-card-title>コメント一覧</v-card-title>
-            <v-list-item v-for="comment in comments" :key="comment.response_date">
+            <v-list-item v-for="comment in comments" :key="comment.response_uuid">
               <v-list-item-content>
                 <v-row>
                   <v-col cols="10">
-                    <v-list-item-title>{{ comment.response_comment }}</v-list-item-title>
+                    <v-list-item-title> {{ comment.index }}. {{ comment.response_comment }}</v-list-item-title>
                     <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
                   </v-col>
                   <v-col cols="2" v-if="isAdminMode">
@@ -168,7 +168,7 @@
       <v-card>
         <v-card-title>要望の削除</v-card-title>
         <v-card-text>
-          <p>ID: {{ currentRequest.id }}</p>
+          <p>ID: {{ currentRequest.request_id }}</p>
           <p>内容: {{ currentRequest.content }}</p>
           <p>登録日: {{ currentRequest.input_date }}</p>
           <v-text-field
@@ -219,7 +219,7 @@ const props = defineProps({
 });
 
 const headers = [
-  { title: 'ID', key: 'request_id' },  // 表示用のインクリメントID
+  { text: 'No.', value: 'index', sortable: false },  // 行番号用の列を追加
   { title: '内容', key: 'content' },
   { title: '部署', key: 'requester_department' },
   { title: '氏名', key: 'requester_name' },
@@ -229,7 +229,7 @@ const headers = [
   { title: '更新日時', key: 'update_date' },
   { title: '担当部署', key: 'assigned_department' },
   { title: '担当者名', key: 'assigned_person' },
-  { title: 'アクション', key: 'actions', sortable: false },
+  { title: '', key: 'actions', sortable: false },
 ];
 
 const statusOptions = [
@@ -321,9 +321,10 @@ const isDeleteCommentDialogOpen = ref(false)
 const fetchRequests = async () => {
   try {
     const response = await axios.get('http://127.0.0.1:5000/requests');
-    requests.value = response.data.map(request => {
+    requests.value = response.data.map((request, index) => {
       return {
         ...request,
+        index: index + 1,
         input_date: new Date(request.input_date).toLocaleString('ja-JP', {
           year: 'numeric',
           month: '2-digit',
@@ -354,9 +355,10 @@ const searchRequests = () => {
 const viewDetails = async (request_uuid) => {
   try {
     const response = await axios.get(`http://127.0.0.1:5000/requests/${request_uuid}/comments`);
-    comments.value = response.data.map(comment => {
+    comments.value = response.data.map((comment, index) => {
       return {
         ...comment,
+        index: index + 1,
         response_date: new Date(comment.response_date).toLocaleString('ja-JP', {
           year: 'numeric',
           month: '2-digit',
