@@ -1,7 +1,6 @@
 <template>
   <v-container class="my-2">
     <v-card>
-      
       <v-card-title>
           要望一覧
           <v-btn icon @click="isSearchDialogOpen = true" class="mx-10">
@@ -48,12 +47,22 @@
                   </v-dialog>
                 </v-col>
               </v-row>
-              <v-btn type="submit" color="primary">検索</v-btn>
+              <v-row justify="center">
+                <v-col cols="auto">
+                  <v-btn type="submit" color="primary">
+                    <v-icon left>mdi-magnify</v-icon>
+                    検索
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-form>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="isSearchDialogOpen = false">閉じる</v-btn>
+            <v-btn color="blue darken-1" text @click="isSearchDialogOpen = false">
+              <v-icon left>mdi-cancel</v-icon>
+              閉じる
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
