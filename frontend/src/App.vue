@@ -25,10 +25,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 const isAdminMode = ref(false);
-// const router = useRouter();
 
 const toggleMode = () => {
   isAdminMode.value = !isAdminMode.value;
