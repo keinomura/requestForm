@@ -18,7 +18,7 @@ db = SQLAlchemy(app)
 # 要望についての情報を格納するRequestテーブルと、対応についての情報を格納するResponseテーブルを定義
 class Request(db.Model): # 要望についての情報を格納するRequestテーブル
     __tablename__ = 'Requests'
-    request_uuid = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更:TODO:こちらでuuid生成でもいいかも。
+    request_uuid = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
     content = db.Column(db.Text, nullable=False)
     requester_department = db.Column(db.String(255))
     requester_name = db.Column(db.String(255))
@@ -73,11 +73,11 @@ def add_request():
 @app.route('/responses', methods=['POST'])
 def add_response():
     data = request.get_json()
-    
+
     # 日付の変換
     response_date = datetime.fromisoformat(data['response_date']) if 'response_date' in data else None
     final_response_date = datetime.fromisoformat(data['final_response_date']) if 'final_response_date' in data else None
-    
+
     new_response = Response(
         request_uuid=data['request_uuid'],
         handler_company=data.get('handler_company', ''),
@@ -101,7 +101,6 @@ def get_requests():
     for request_item in requests:
         output.append({
             'request_uuid': request_item.request_uuid,
-            # 'request_id': request_item.request_id,
             'content': request_item.content,
             'requester_department': request_item.requester_department,
             'requester_name': request_item.requester_name,
@@ -110,7 +109,6 @@ def get_requests():
             'response_comment': request_item.response_comment,
             'assigned_department': request_item.assigned_department,
             'assigned_person': request_item.assigned_person,
-            # 'update_date': (request_item.update_date).strftime('%Y-%m-%d %H:%M:%S') if request_item.update_date else None  # 日本時間に変換
             'update_date': request_item.update_date if request_item.update_date else None  # 日本時間に変換しない。 input_dataと同じ形式で返す
 
         })
