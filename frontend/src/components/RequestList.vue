@@ -96,7 +96,6 @@
                 <v-list-item-subtitle>{{ item.assigned_department }} {{ item.assigned_person }} {{ item.update_date }}</v-list-item-subtitle>
               </v-list-item-content>
             </v-list-item>
- 
           </v-list>
         </v-card-text>
       </v-card>
@@ -272,7 +271,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+// import { useRoute } from 'vue-router';
 import { defineProps } from 'vue';
 
 const props = defineProps({
