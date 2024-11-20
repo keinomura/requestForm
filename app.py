@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 import uuid
 
 app = Flask(__name__)
@@ -127,8 +127,7 @@ def update_request(request_uuid):
     request_item.response_comment = data.get('response_comment', request_item.response_comment)
     request_item.assigned_department = data.get('assigned_department', request_item.assigned_department)
     request_item.assigned_person = data.get('assigned_person', request_item.assigned_person)
-    request_item.update_date = datetime.utcnow()
-
+    request_item.update_date = datetime.now(timezone.utc)
     # デバッグ用のログを追加
     print(f"Updated request_item.update_date: {request_item.update_date}")
 
@@ -139,7 +138,7 @@ def update_request(request_uuid):
         handler_name=data.get('assigned_person', ''),
         status=data.get('status', '未対応'),
         response_comment=data.get('response_comment', ''),
-        response_date=datetime.utcnow()
+        response_date = datetime.now(timezone.utc)
     )
     db.session.add(new_response)
     db.session.commit()
