@@ -85,12 +85,24 @@
           </v-toolbar>
         </template> -->
         <template v-slot:expanded-row="{ columns, item }">
-          <tr>
-            <td :colspan="columns.length">
-              More info about {{ item.name }}
-            </td>
-          </tr>
-        </template>
+  <tr>
+    <td :colspan="columns.length">
+      <v-card flat>
+        <v-card-text>
+          <v-list dense>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-title>{{ item.response_comment }}</v-list-item-title>
+                <v-list-item-subtitle>{{ item.assigned_department }} {{ item.assigned_person }} {{ item.update_date }}</v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+ 
+          </v-list>
+        </v-card-text>
+      </v-card>
+    </td>
+  </tr>
+</template>
         <template v-slot:[`item.actions`]="{ item }">
           <v-btn color="primary" @click="viewDetails(item.request_uuid)">
             <v-icon left>mdi-eye</v-icon>
@@ -274,11 +286,11 @@ const headers = [
   { title: '氏名', key: 'requester_name' },
   { title: '登録日時', key: 'input_date' },
   { title: '対応状況', key: 'status' },
-  { title: '', key: 'data-table-expand'},
-  { title: '最新コメント', key: 'response_comment' },
+  { title: 'コメント', key: 'data-table-expand'},
+  // { title: '最新コメント', key: 'response_comment' },
   { title: '更新日時', key: 'update_date' },
-  { title: '担当部署', key: 'assigned_department' },
-  { title: '担当者名', key: 'assigned_person' },
+  // { title: '担当部署', key: 'assigned_department' },
+  // { title: '担当者名', key: 'assigned_person' },
   { title: '', key: 'actions', sortable: false },
 ];
 
