@@ -45,7 +45,14 @@
     methods: {
       async submitProgress() {
         try {
-          await axios.put(`http://127.0.0.1:5000/responses/${this.request_id}`, {
+          // ローカル環境でのAPIサーバーへのリクエスト
+          // await axios.put(`http://127.0.0.1:5000/responses/${this.request_id}`, {
+          //   status: this.status,
+          //   response_comment: this.response_comment,
+          //   handler_name: this.handler_name
+          // });
+          // 本番環境でのAPIサーバーへのリクエスト
+          await axios.put(`http://felddorf.sakura.ne.jp/responses/${this.request_id}`, {
             status: this.status,
             response_comment: this.response_comment,
             handler_name: this.handler_name

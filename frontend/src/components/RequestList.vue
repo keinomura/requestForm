@@ -381,7 +381,12 @@ const isDeleteCommentDialogOpen = ref(false)
 // 一覧表示用データ取得
 const fetchRequests = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:5000/requests');
+    // 開発環境でのAPIサーバーへのリクエスト
+    // const response = await axios.get('http://127.0.0.1:5000/requests');
+
+    // 本番環境でのAPIサーバーへのリクエスト
+    const response = await axios.get('http://felddorf.sakura.ne.jp/requests');
+
     requests.value = response.data.map((request, index) => {
       return {
         ...request,
@@ -415,6 +420,10 @@ const searchRequests = () => {
 // 詳細ダイアログ処理
 const viewDetails = async (request_uuid) => {
   try {
+    // 開発環境でのAPIサーバーへのリクエスト
+    // const response = await axios.get(`http://127.0.0.1:5000/requests/${request_uuid}/comments`);
+
+    // 本番環境でのAPIサーバーへのリクエスト
     const response = await axios.get(`http://127.0.0.1:5000/requests/${request_uuid}/comments`);
     comments.value = response.data.map((comment, index) => {
       return {
@@ -461,7 +470,10 @@ const updateProgress = async () => {
 
   try {
     currentRequest.value.update_date = new Date()
-    await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.request_uuid}`, currentRequest.value);
+    // 開発環境でのAPIサーバーへのリクエスト
+    // await axios.put(`http://127.0.0.1:5000/requests/${currentRequest.value.request_uuid}`, currentRequest.value);
+    // 本番環境でのAPIサーバーへのリクエスト
+    await axios.put(`http://felddorf.sakura.ne.jp/requests/${currentRequest.value.request_uuid}`, currentRequest.value);
     fetchRequests(); // 更新後にリストを再取得
     closeDialog();
     closePasswordDialog();
@@ -488,7 +500,10 @@ const deleteRequest = async () => {
   }
 
   try {
-    await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.request_uuid}`);
+    // 開発環境でのAPIサーバーへのリクエスト
+    // await axios.delete(`http://127.0.0.1:5000/requests/${currentRequest.value.request_uuid}`);
+    // 本番環境でのAPIサーバーへのリクエスト
+    await axios.delete(`http://felddorf.sakura.ne.jp/requests/${currentRequest.value.request_uuid}`);
     alert('要望が削除されました');
     fetchRequests();
     closeDeleteDialog();
@@ -527,8 +542,10 @@ const confirmDeleteComment = async () => {
       alert('パスワードが正しくありません');
       return;
     }
-
-    await axios.delete(`http://127.0.0.1:5000/comments/${deleteCommentUuid.value}`);
+    // 開発環境でのAPIサーバーへのリクエスト
+    // await axios.delete(`http://127.0.0.1:5000/comments/${deleteCommentUuid.value}`);
+    // 本番環境でのAPIサーバーへのリクエスト
+    await axios.delete(`http://felddorf.sakura.ne.jp/comments/${deleteCommentUuid.value}`);
     alert('コメントが削除されました');
     //コメント一覧に戻る。コメントが何もなければ要望一覧画面に戻る。
     viewDetails(currentRequest.value.request_uuid); // コメント削除後にコメント一覧を再取得
