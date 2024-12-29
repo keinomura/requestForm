@@ -1,17 +1,17 @@
 RewriteEngine On
 RewriteBase /requestForm/
 
+# Vue Routerのhistoryモードをサポートするための設定
+RewriteRule ^index\.html$ - [L]
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /index.cgi/$1 [QSA,L]
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+<!-- # CGIスクリプトのリダイレクト設定
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^requestForm_api(.*)$ /cgi-bin/index.cgi/requestForm_api/$1 [QSA,L] -->
+
+# .pyファイルへのアクセスを禁止
 <Files ~ "\.py$">
   deny from all
 </Files>
-
-<!-- <IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /requestForm/
-    RewriteRule ^index\.html$ - [L]
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule . /index.html [L]
-  </IfModule> -->
