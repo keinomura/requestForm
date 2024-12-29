@@ -37,14 +37,14 @@ const router = useRouter();
 const submitRequest = async () => {
   try {
     // ローカル環境でのAPIサーバーへのリクエスト
-    // await axios.post('http://127.0.0.1:5000/requests', {
+    // await axios.post('https://127.0.0.1:5000/requests', {
     //   content: content.value,
     //   requester_department: requester_department.value,
     //   requester_name: requester_name.value,
     // });
-    
+
     // 本番環境でのAPIサーバーへのリクエスト
-    await axios.post('http://felddorf.sakura.ne.jp/requests', {
+    await axios.post('https://felddorf.sakura.ne.jp/requestForm_api/requests', {
       content: content.value,
       requester_department: requester_department.value,
       requester_name: requester_name.value,

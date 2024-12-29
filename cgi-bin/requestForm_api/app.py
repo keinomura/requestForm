@@ -63,7 +63,7 @@ with app.app_context():
 
 ## 要望 Requests
 # 新しい要望を追加するAPI
-@app.route('/requests', methods=['POST'])
+@app.route('/requestForm_api/requests', methods=['POST'])
 def add_request():
     data = request.get_json()
     if 'requester_department' not in data:
@@ -78,7 +78,7 @@ def add_request():
     return jsonify({'message': '新しい要望が追加されました'}), 201
 
 # 新しい対応を追加するAPI
-@app.route('/responses', methods=['POST'])
+@app.route('/requestForm_api/responses', methods=['POST'])
 def add_response():
     data = request.get_json()
 
@@ -102,7 +102,7 @@ def add_response():
     return jsonify({'message': '新しい対応が追加されました'}), 201
 
 # 要望一覧の取得API
-@app.route('/requests', methods=['GET'])
+@app.route('/requestForm_api/requests', methods=['GET'])
 def get_requests():
     requests = Request.query.all()
     output = []
@@ -123,7 +123,7 @@ def get_requests():
     return jsonify(output)
 
 # 進捗情報の更新API　
-@app.route('/requests/<request_uuid>', methods=['PUT'])
+@app.route('/requestForm_api/requests/<request_uuid>', methods=['PUT'])
 def update_request(request_uuid):
     data = request.json
     request_item = Request.query.filter_by(request_uuid=request_uuid).first()
@@ -154,7 +154,7 @@ def update_request(request_uuid):
 
 
 # 特定のリクエストに関連するコメントを取得するAPI
-@app.route('/requests/<request_uuid>/comments', methods=['GET'])
+@app.route('/requestForm_api/requests/<request_uuid>/comments', methods=['GET'])
 def get_request_comments(request_uuid):
     request_item = Request.query.filter_by(request_uuid=request_uuid).first()
     if not request_item:
@@ -175,7 +175,7 @@ def get_request_comments(request_uuid):
     return jsonify(comments)
 
 #リクエストの削除API
-@app.route('/requests/<request_uuid>', methods=['DELETE'])
+@app.route('/requestForm_api/requests/<request_uuid>', methods=['DELETE'])
 def delete_request(request_uuid):
     request_item = Request.query.get(request_uuid)
     if not request_item:
@@ -186,7 +186,7 @@ def delete_request(request_uuid):
     return jsonify({"message": "Request deleted successfully"}), 200
 
 # コメントの削除API
-@app.route('/comments/<response_uuid>', methods=['DELETE'])
+@app.route('/requestForm_api/comments/<response_uuid>', methods=['DELETE'])
 def delete_comment(response_uuid):
     comment = Response.query.filter_by(response_uuid=response_uuid).first()
     if not comment:

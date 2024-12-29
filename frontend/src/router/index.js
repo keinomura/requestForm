@@ -14,8 +14,11 @@ const routes = [
   },
 ];
 
+// 以下のように、createWebHistory() の引数にベースURLを設定することで、
+// ルーティングのベースURLを設定できます。
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/requestForm/'), // ベースURLを設定
   routes,
 });
 
