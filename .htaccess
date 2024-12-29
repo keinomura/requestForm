@@ -1,0 +1,17 @@
+RewriteEngine On
+RewriteBase /requestForm/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ /index.cgi/$1 [QSA,L]
+<Files ~ "\.py$">
+  deny from all
+</Files>
+
+<!-- <IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /requestForm/
+    RewriteRule ^index\.html$ - [L]
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . /index.html [L]
+  </IfModule> -->
