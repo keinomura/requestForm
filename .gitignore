@@ -211,6 +211,7 @@ test/
 
 .env.development
 .env.production
+.env*
 
 
 # End of https://www.toptal.com/developers/gitignore/api/flask,vue
