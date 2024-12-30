@@ -20,6 +20,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['ENV'] = os.getenv('FLASK_ENV')
 app.config['DEBUG'] = os.getenv('FLASK_DEBUG')
 
+db = SQLAlchemy(app)
 
 # #SQLiteデータベースの設定
 # # プロジェクトディレクトリに対する相対パスを使用してデータベースファイルのパスを設定
