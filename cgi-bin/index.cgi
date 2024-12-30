@@ -10,7 +10,6 @@ import sys
 import os
 
 # Flaskアプリのパスを追加
-# path.insert(0, '/felddorf/www/cgi-bin/requestForm_api')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/requestForm_api')
 
 try:
@@ -31,7 +30,7 @@ class ProxyFix(object):
         environ['REQUEST_METHOD'] = environ.get('REQUEST_METHOD', 'GET')
         # environ['SCRIPT_NAME'] = ""
         # environ['PATH_INFO'] = "/"
-        # environ['QUERY_STRING'] = "/requestForm_api/requests"
+        # environ['QUERY_STRING'] = "/"
         environ['SERVER_PROTOCOL'] = "HTTP/1.1"
         return self.app(environ, start_response)
     
