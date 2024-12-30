@@ -1,27 +1,27 @@
 <template>
-    <v-container>
-      <v-card>
-        <v-card-title>新規要望の追加</v-card-title>
-        <v-card-text>
-          <v-form ref="form">
-            <v-text-field label="内容" v-model="content" required></v-text-field>
-            <v-text-field label="部署" v-model="requester_department" required></v-text-field>
-            <v-text-field label="氏名" v-model="requester_name" required></v-text-field>
-          </v-form>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-        <v-btn text color="blue darken-1" @click="$router.push('/')">
-          <v-icon left>mdi-cancel</v-icon>
-          キャンセル
-        </v-btn>
-        <v-btn text color="primary" @click="submitRequest">
-          <v-icon left>mdi-plus-box</v-icon>
-          追加
-        </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-container>
+  <v-container>
+    <v-card>
+      <v-card-title>新規要望の追加</v-card-title>
+      <v-card-text>
+        <v-form ref="form">
+          <v-text-field label="内容" v-model="content" required></v-text-field>
+          <v-text-field label="部署" v-model="requester_department" required></v-text-field>
+          <v-text-field label="氏名" v-model="requester_name" required></v-text-field>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+      <v-btn text color="blue darken-1" @click="$router.push('/')">
+        <v-icon left>mdi-cancel</v-icon>
+        キャンセル
+      </v-btn>
+      <v-btn text color="primary" @click="submitRequest">
+        <v-icon left>mdi-plus-box</v-icon>
+        追加
+      </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup>
@@ -36,6 +36,13 @@ const router = useRouter();
 
 const submitRequest = async () => {
   try {
+    // 環境変数からAPIサーバーのURLを取得
+    const apiUrl = import.meta.env.VITE_API_URL;
+    await axios.post(`${apiUrl}/requests`, {
+      content: content.value,
+      requester_department: requester_department.value,
+      requester_name: requester_name.value,
+    });
     // ローカル環境でのAPIサーバーへのリクエスト
     // await axios.post('https://127.0.0.1:5000/requests', {
     //   content: content.value,
@@ -43,12 +50,12 @@ const submitRequest = async () => {
     //   requester_name: requester_name.value,
     // });
 
-    // 本番環境でのAPIサーバーへのリクエスト
-    await axios.post('https://felddorf.sakura.ne.jp/requestForm_api/requests', {
-      content: content.value,
-      requester_department: requester_department.value,
-      requester_name: requester_name.value,
-    });
+    // // 本番環境でのAPIサーバーへのリクエスト
+    // await axios.post('https://felddorf.sakura.ne.jp/requestForm_api/requests', {
+    //   content: content.value,
+    //   requester_department: requester_department.value,
+    //   requester_name: requester_name.value,
+    // });
     alert('要望が追加されました');
     content.value = '';
     requester_department.value = '';

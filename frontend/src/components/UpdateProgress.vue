@@ -45,6 +45,12 @@
     methods: {
       async submitProgress() {
         try {
+          const apiUrl = import.meta.env.VITE_API_URL;
+          await axios.put(`${apiUrl}/responses/${this.request_id}`, {
+            status: this.status,
+            response_comment: this.response_comment,
+            handler_name: this.handler_name
+          });
           // ローカル環境でのAPIサーバーへのリクエスト
           // await axios.put(`https://127.0.0.1:5000/responses/${this.request_id}`, {
           //   status: this.status,
@@ -52,11 +58,11 @@
           //   handler_name: this.handler_name
           // });
           // 本番環境でのAPIサーバーへのリクエスト
-          await axios.put(`https://felddorf.sakura.ne.jp/requestForm_api/responses/${this.request_id}`, {
-            status: this.status,
-            response_comment: this.response_comment,
-            handler_name: this.handler_name
-          });
+          // await axios.put(`https://felddorf.sakura.ne.jp/requestForm_api/responses/${this.request_id}`, {
+          //   status: this.status,
+          //   response_comment: this.response_comment,
+          //   handler_name: this.handler_name
+          // });
           alert('進捗情報が更新されました');
           this.request_id = '';
           this.status = '未対応';
