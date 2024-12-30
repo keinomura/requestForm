@@ -7,9 +7,9 @@ RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.html [L]
 
-<!-- # CGIスクリプトのリダイレクト設定
+# CGIスクリプトのリダイレクト設定
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^requestForm_api(.*)$ /cgi-bin/index.cgi/requestForm_api/$1 [QSA,L] -->
+RewriteRule ^requestForm_api/(.*)$ /cgi-bin/index.cgi/requestForm_api/$1 [QSA,L]
 
 # .pyファイルへのアクセスを禁止
 <Files ~ "\.py$">

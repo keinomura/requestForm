@@ -196,5 +196,13 @@ def delete_comment(response_uuid):
     db.session.commit()
     return jsonify({"message": "Comment deleted successfully"}), 200
 
+@app.route('/requestForm_api/')
+def api_index():
+    return "Hello, World!"
+
+@app.route('/')
+def index():
+    return "Hello, World2!"
+
 if __name__ == '__main__':
     app.run(debug=True)
