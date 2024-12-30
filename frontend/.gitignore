@@ -209,4 +209,8 @@ docs/_book
 # TODO: where does this rule come from?
 test/
 
+.env.development
+.env.production
+
+
 # End of https://www.toptal.com/developers/gitignore/api/flask,vue
