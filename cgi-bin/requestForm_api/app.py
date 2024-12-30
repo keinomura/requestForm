@@ -6,9 +6,20 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime, timezone
 import uuid
+from dotenv import load_dotenv
+
+# 環境変数を読み込む
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
+
+# 環境変数から設定を読み込む
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['ENV'] = os.getenv('FLASK_ENV')
+app.config['DEBUG'] = os.getenv('FLASK_DEBUG')
+
 
 # #SQLiteデータベースの設定
 # # プロジェクトディレクトリに対する相対パスを使用してデータベースファイルのパスを設定
@@ -18,9 +29,9 @@ CORS(app)
 # db = SQLAlchemy(app)
 
 # MySQLデータベースの設定
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://felddorf_request_db:sakura2rental4db@mysql3102.db.sakura.ne.jp/felddorf_request_db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://felddorf_request_db:sakura2rental4db@mysql3102.db.sakura.ne.jp/felddorf_request_db'
+# app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# db = SQLAlchemy(app)
 
 # モデルの定義
 # 要望についての情報を格納するRequestテーブルと、対応についての情報を格納するResponseテーブルを定義
