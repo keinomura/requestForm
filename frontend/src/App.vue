@@ -36,6 +36,7 @@ const toggleMode = () => {
 <style scoped>
 .main-content {
   margin-top: 64px; /* v-app-barの高さに合わせて調整 */
+  padding: 0 10px;
 }
 
 .v-btn {
@@ -44,6 +45,8 @@ const toggleMode = () => {
 /* 全体のレイアウト設定 */
 #app {
   font-family: Arial, sans-serif;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 /* ヘッダーとナビゲーションバーのスタイル */
 header {
@@ -53,7 +56,7 @@ header {
   text-align: center;
   position: sticky;
   top: 0;
-  width: 60%;
+  width: 100%;
   z-index: 1000;
 }
 
@@ -72,5 +75,51 @@ nav a:hover {
 /* メインコンテンツのスタイル */
 main {
   padding: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .v-app-bar .v-toolbar-title {
+    font-size: 1.2rem;
+  }
+  
+  .v-btn {
+    margin-left: 4px;
+    padding: 0 8px !important;
+  }
+  
+  .v-btn__content {
+    font-size: 0.8rem;
+  }
+  
+  .v-icon {
+    font-size: 1.2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .v-app-bar .v-toolbar-title {
+    font-size: 1rem;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .v-btn {
+    min-width: unset !important;
+    margin-left: 2px;
+    padding: 0 4px !important;
+  }
+  
+  .v-btn__content {
+    font-size: 0.7rem;
+  }
+  
+  .v-icon {
+    font-size: 1rem !important;
+  }
 }
 </style>

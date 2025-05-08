@@ -126,34 +126,40 @@
       </v-data-table>
     </v-card>
 
-    <v-dialog v-model="isDialogOpen" max-width="500px">
-      <v-card>
-        <v-card-title>進捗情報の更新</v-card-title>
-        <v-card-text>
-          <v-form ref="form">
-            <v-select
-              v-model="currentRequest.status"
-              :items="filteredStatusOptions"
-              label="対応状況"
-              required
-            ></v-select>
-            <v-textarea
-              v-model="currentRequest.response_comment"
-              label="最新コメント"
-              required
-            ></v-textarea>
-            <v-text-field
-              v-model="currentRequest.assigned_department"
-              label="担当部署"
-              required
-            ></v-text-field>
-            <v-text-field
-              v-model="currentRequest.assigned_person"
-              label="担当者名"
-              required
-            ></v-text-field>
-          </v-form>
-        </v-card-text>
+      <v-dialog v-model="isDialogOpen" max-width="500px">
+        <v-card>
+          <v-card-title>進捗情報の更新</v-card-title>
+          <v-card-text>
+            <v-form ref="form">
+              <v-select
+                v-model="currentRequest.status"
+                :items="filteredStatusOptions"
+                label="対応状況"
+                required
+              ></v-select>
+              <v-textarea
+                v-model="currentRequest.response_comment"
+                label="最新コメント"
+                required
+              ></v-textarea>
+              <v-select
+                v-model="currentRequest.handler_company"
+                :items="companyOptions"
+                label="対応会社"
+                required
+              ></v-select>
+              <v-text-field
+                v-model="currentRequest.assigned_department"
+                label="担当部署"
+                required
+              ></v-text-field>
+              <v-text-field
+                v-model="currentRequest.assigned_person"
+                label="担当者名"
+                required
+              ></v-text-field>
+            </v-form>
+          </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="closeDialog">
@@ -195,7 +201,12 @@
                 <v-row>
                   <v-col cols="10">
                     <v-list-item-title> {{ comment.index }}. {{ comment.response_comment }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ comment.handler_name }} ({{ comment.handler_department }})  更新日時: {{ comment.response_date }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>
+                      {{ comment.handler_name }} 
+                      <span v-if="comment.handler_company">({{ comment.handler_company }} - {{ comment.handler_department }})</span>
+                      <span v-else>({{ comment.handler_department }})</span>
+                      更新日時: {{ comment.response_date }}
+                    </v-list-item-subtitle>
                   </v-col>
                   <v-col cols="2" v-if="isAdminMode">
                     <v-btn icon @click="openDeleteCommentDialog(comment.response_uuid)">
@@ -304,6 +315,13 @@ const statusOptions = [
   '要追加情報',
   '対応保留',
   '対応不可'
+];
+
+const companyOptions = [
+  '電子カルテシステム',
+  'ネットワークシステム',
+  '画像システム',
+  'その他'
 ];
 
 const filteredStatusOptions = computed(() => {

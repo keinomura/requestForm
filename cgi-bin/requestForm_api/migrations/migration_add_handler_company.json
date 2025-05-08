@@ -1,0 +1,6 @@
+{
+  "description": "問題対応部署（会社）の項目を追加",
+  "sql_statements": [
+    "ALTER TABLE Responses ADD COLUMN handler_company VARCHAR(255) AFTER request_uuid;"
+  ]
+}

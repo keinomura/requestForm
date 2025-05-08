@@ -4,7 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import uuid
 from dotenv import load_dotenv
 
@@ -35,7 +35,7 @@ db = SQLAlchemy(app)
 # db = SQLAlchemy(app)
 
 # モデルの定義
-# 要望についての情報を格納するRequestテーブルと、対応についての情報を格納するResponseテーブルを定義
+# 要望についての情報を格納するRequestテーブルと、対応についての情報を格納するResponseテーブルを定義 
 class Request(db.Model): # 要望についての情報を格納するRequestテーブル
     __tablename__ = 'Requests'
     request_uuid = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))  # UUIDを使用するためにString型に変更
@@ -125,19 +125,32 @@ def add_response():
 def get_requests():
     requests = Request.query.all()
     output = []
+    # 日本時間のタイムゾーン（UTC+9）
+    jst = timezone(timedelta(hours=9))
+    
     for request_item in requests:
+        # 日付がUTCで保存されている場合、日本時間に変換
+        input_date = request_item.input_date
+        if input_date and input_date.tzinfo is None:
+            # タイムゾーン情報がない場合はUTCとみなして日本時間に変換
+            input_date = input_date.replace(tzinfo=timezone.utc).astimezone(jst)
+        
+        update_date = request_item.update_date
+        if update_date and update_date.tzinfo is None:
+            # タイムゾーン情報がない場合はUTCとみなして日本時間に変換
+            update_date = update_date.replace(tzinfo=timezone.utc).astimezone(jst)
+        
         output.append({
             'request_uuid': request_item.request_uuid,
             'content': request_item.content,
             'requester_department': request_item.requester_department,
             'requester_name': request_item.requester_name,
-            'input_date': request_item.input_date,
+            'input_date': input_date,
             'status': request_item.status,
             'response_comment': request_item.response_comment,
             'assigned_department': request_item.assigned_department,
             'assigned_person': request_item.assigned_person,
-            'update_date': request_item.update_date if request_item.update_date else None  # 日本時間に変換しない。 input_dataと同じ形式で返す
-
+            'update_date': update_date
         })
     return jsonify(output)
 
@@ -161,6 +174,7 @@ def update_request(request_uuid):
     # Responseテーブルに新しいコメントを追加
     new_response = Response(
         request_uuid=request_uuid,
+        handler_company=data.get('handler_company', ''),
         handler_department=data.get('assigned_department', ''),
         handler_name=data.get('assigned_person', ''),
         status=data.get('status', '未対応'),
@@ -181,16 +195,25 @@ def get_request_comments(request_uuid):
 
     responses = Response.query.filter_by(request_uuid=request_uuid).all()
     comments = []
+    # 日本時間のタイムゾーン（UTC+9）
+    jst = timezone(timedelta(hours=9))
+    
     for response in responses:
+        # 日付がUTCで保存されている場合、日本時間に変換
+        response_date = response.response_date
+        if response_date and response_date.tzinfo is None:
+            # タイムゾーン情報がない場合はUTCとみなして日本時間に変換
+            response_date = response_date.replace(tzinfo=timezone.utc).astimezone(jst)
+        
         comments.append({
             'response_uuid': response.response_uuid,
+            'handler_company': response.handler_company,
             'handler_department': response.handler_department,
             'handler_name': response.handler_name,
             'status': response.status,
             'response_comment': response.response_comment,
-            'response_date': response.response_date
+            'response_date': response_date
         })
-        print('res', response.response_date.time())
     return jsonify(comments)
 
 #リクエストの削除API
