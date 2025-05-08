@@ -66,64 +66,158 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-data-table
-        :headers="headers"
-        :items="filteredRequests"
-        class="elevation-1"
-        item-key="request_uuid"
-        dense
-        :item-class="getRowClass"
-        item-value="request_uuid"
-        show-expand
-      >
-        <template v-slot:[`item.status`]="{ item }">
-          <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
-        </template>
-        <!-- <template v-slot:top>
-          <v-toolbar flat>
-            <v-toolbar-title>Expandable Table</v-toolbar-title>
-          </v-toolbar>
-        </template> -->
-        <template v-slot:expanded-row="{ columns, item }">
-  <tr>
-    <td :colspan="columns.length">
-      <v-card flat>
-        <v-card-text>
-          <v-list dense>
-            <v-list-item>
-              <v-list-item-content>
-                <v-list-item-title>{{ item.response_comment }}</v-list-item-title>
-                <v-list-item-subtitle>{{ item.assigned_department }} {{ item.assigned_person }} {{ item.update_date }}</v-list-item-subtitle>
-              </v-list-item-content>
-            </v-list-item>
-          </v-list>
+      
+      <!-- デスクトップ表示用のテーブル -->
+      <div class="d-none d-md-block">
+        <v-data-table
+          :headers="headers"
+          :items="filteredRequests"
+          class="elevation-1"
+          item-key="request_uuid"
+          dense
+          :item-class="getRowClass"
+          item-value="request_uuid"
+          show-expand
+        >
+          <template v-slot:[`item.status`]="{ item }">
+            <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
+          </template>
+          <template v-slot:expanded-row="{ columns, item }">
+            <tr>
+              <td :colspan="columns.length">
+                <v-card flat>
+                  <v-card-text>
+                    <v-list dense>
+                      <v-list-item>
+                        <template v-slot:default>
+                          <div class="v-list-item-title">{{ item.response_comment }}</div>
+                          <div class="v-list-item-subtitle">
+                            <v-chip x-small :color="getHandlerColor(item.handler_company)" class="mr-1" v-if="item.handler_company">
+                              {{ item.handler_company }}
+                            </v-chip>
+                            {{ item.assigned_department }} {{ item.assigned_person }} {{ item.update_date }}
+                          </div>
+                        </template>
+                      </v-list-item>
+                    </v-list>
+                  </v-card-text>
+                </v-card>
+              </td>
+            </tr>
+          </template>
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-btn color="primary" @click="viewDetails(item.request_uuid)">
+              <v-icon left>mdi-eye</v-icon>
+              詳細
+            </v-btn>
+            <v-btn
+              color="secondary"
+              @click="openUpdateDialog(item)"
+              :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
+            >
+              <v-icon left>mdi-pencil</v-icon>
+              進捗
+            </v-btn>
+            <v-btn
+              v-if="isAdminMode"
+              color="red"
+              @click="openDeleteDialog(item)"
+            >
+              <v-icon left>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-data-table>
+      </div>
+      
+      <!-- モバイル表示用のカードビュー -->
+      <div class="d-md-none">
+        <v-card-text class="pa-0">
+          <v-container fluid>
+            <v-row>
+              <v-col cols="12" v-for="item in filteredRequests" :key="item.request_uuid" class="pa-2">
+                <v-card :class="getCardClass(item.status)" elevation="2" class="mobile-card">
+                  <v-card-title class="text-subtitle-1 py-2 d-flex justify-space-between">
+                    <div class="d-flex align-center">
+                      <span class="mr-2">No.{{ item.index }}</span>
+                      <v-chip :color="getStatusColor(item.status)" dark x-small class="mr-2">{{ item.status }}</v-chip>
+                    </div>
+                    <div class="text-caption">{{ item.update_date }}</div>
+                  </v-card-title>
+                  
+                  <!-- 内容セクション - より目立つように -->
+                  <v-card-text class="content-section py-3">
+                    <p class="text-body-1 font-weight-medium mobile-content">{{ item.content }}</p>
+                  </v-card-text>
+                  
+                  <!-- 詳細情報セクション -->
+                  <v-card-text class="py-2 px-4 grey lighten-4">
+                    <v-row dense>
+                      <v-col cols="6">
+                        <p class="text-caption mb-1"><strong>部署:</strong> {{ item.requester_department }}</p>
+                      </v-col>
+                      <v-col cols="6">
+                        <p class="text-caption mb-1"><strong>氏名:</strong> {{ item.requester_name }}</p>
+                      </v-col>
+                    </v-row>
+                    <v-row dense>
+                      <v-col cols="12">
+                        <p class="text-caption mb-1"><strong>登録日時:</strong> {{ item.input_date }}</p>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                  
+                  <!-- 対応情報セクション -->
+                  <v-card-text v-if="item.handler_company || item.assigned_department" class="py-2 px-4 handler-info">
+                    <v-chip small :color="getHandlerColor(item.handler_company)" class="mb-1 mr-1" v-if="item.handler_company">
+                      {{ item.handler_company }}
+                    </v-chip>
+                    <v-chip small color="blue-grey lighten-4" class="mb-1" v-if="item.assigned_department">
+                      {{ item.assigned_department }}
+                    </v-chip>
+                  </v-card-text>
+                  
+                  <!-- コメントセクション -->
+                  <template v-if="item.response_comment">
+                    <v-divider></v-divider>
+                    <v-card-text class="py-2">
+                      <p class="text-caption font-weight-bold">最新コメント:</p>
+                      <p class="text-body-2 comment-text">{{ item.response_comment }}</p>
+                      <p class="text-caption">{{ item.assigned_department }} {{ item.assigned_person }}</p>
+                    </v-card-text>
+                  </template>
+                  
+                  <!-- ボタンセクション - モバイルでの操作性向上 -->
+                  <v-card-actions class="pa-3 justify-space-between">
+                    <v-btn small color="primary" class="px-2" @click="viewDetails(item.request_uuid)">
+                      <v-icon small left>mdi-eye</v-icon>
+                      詳細
+                    </v-btn>
+                    <v-btn
+                      small
+                      color="secondary"
+                      class="px-2"
+                      @click="openUpdateDialog(item)"
+                      :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
+                    >
+                      <v-icon small left>mdi-pencil</v-icon>
+                      進捗
+                    </v-btn>
+                    <v-btn
+                      v-if="isAdminMode"
+                      small
+                      color="red"
+                      class="px-2"
+                      @click="openDeleteDialog(item)"
+                    >
+                      <v-icon small left>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-card-text>
-      </v-card>
-    </td>
-  </tr>
-</template>
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-btn color="primary" @click="viewDetails(item.request_uuid)">
-            <v-icon left>mdi-eye</v-icon>
-            詳細
-          </v-btn>
-          <v-btn
-            color="secondary"
-            @click="openUpdateDialog(item)"
-            :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
-          >
-            <v-icon left>mdi-pencil</v-icon>
-            進捗
-          </v-btn>
-          <v-btn
-            v-if="isAdminMode"
-            color="red"
-            @click="openDeleteDialog(item)"
-          >
-            <v-icon left>mdi-delete</v-icon>
-          </v-btn>
-        </template>
-      </v-data-table>
+      </div>
     </v-card>
 
       <v-dialog v-model="isDialogOpen" max-width="500px">
@@ -197,16 +291,22 @@
       <v-card>
         <v-card-title>コメント一覧</v-card-title>
             <v-list-item v-for="comment in comments" :key="comment.response_uuid">
-              <v-list-item-content>
+              <template v-slot:default>
                 <v-row>
                   <v-col cols="10">
-                    <v-list-item-title> {{ comment.index }}. {{ comment.response_comment }}</v-list-item-title>
-                    <v-list-item-subtitle>
+                    <div class="v-list-item-title"> {{ comment.index }}. {{ comment.response_comment }}</div>
+                    <div class="v-list-item-subtitle">
                       {{ comment.handler_name }} 
-                      <span v-if="comment.handler_company">({{ comment.handler_company }} - {{ comment.handler_department }})</span>
-                      <span v-else>({{ comment.handler_department }})</span>
-                      更新日時: {{ comment.response_date }}
-                    </v-list-item-subtitle>
+                      <div class="mt-1">
+                        <v-chip x-small :color="getHandlerColor(comment.handler_company)" class="mr-1" v-if="comment.handler_company">
+                          {{ comment.handler_company }}
+                        </v-chip>
+                        <v-chip x-small color="blue-grey lighten-4" v-if="comment.handler_department">
+                          {{ comment.handler_department }}
+                        </v-chip>
+                      </div>
+                      <div class="mt-1">更新日時: {{ comment.response_date }}</div>
+                    </div>
                   </v-col>
                   <v-col cols="2" v-if="isAdminMode">
                     <v-btn icon @click="openDeleteCommentDialog(comment.response_uuid)">
@@ -214,7 +314,7 @@
                     </v-btn>
                   </v-col>
                 </v-row>
-              </v-list-item-content>
+              </template>
             </v-list-item>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -296,11 +396,10 @@ const headers = [
   { title: '氏名', key: 'requester_name' },
   { title: '登録日時', key: 'input_date' },
   { title: '対応状況', key: 'status' },
+  { title: '対応企業', key: 'handler_company' },
+  { title: '担当部署', key: 'assigned_department' },
   { title: 'コメント', key: 'data-table-expand'},
-  // { title: '最新コメント', key: 'response_comment' },
   { title: '更新日時', key: 'update_date' },
-  // { title: '担当部署', key: 'assigned_department' },
-  // { title: '担当者名', key: 'assigned_person' },
   { title: '', key: 'actions', sortable: false },
 ];
 
@@ -598,6 +697,42 @@ const getStatusColor = (status) => {
 onMounted(() => {
   fetchRequests();
 });
+const getRowClass = (item) => {
+  if (item.status === '対応完了（電カル委員会承認）') {
+    return 'completed-row';
+  } else if (item.status.includes('対応中')) {
+    return 'status-in-progress';
+  } else if (item.status.includes('対応完了')) {
+    return 'status-completed';
+  }
+  return '';
+};
+
+const getCardClass = (status) => {
+  if (status === '対応完了（電カル委員会承認）') {
+    return 'completed-card';
+  } else if (status.includes('対応中')) {
+    return 'in-progress-card';
+  } else if (status.includes('対応完了')) {
+    return 'completed-card';
+  }
+  return '';
+};
+
+const getHandlerColor = (company) => {
+  switch (company) {
+    case '電子カルテシステム':
+      return 'indigo lighten-1';
+    case 'ネットワークシステム':
+      return 'deep-orange lighten-1';
+    case '画像システム':
+      return 'teal lighten-1';
+    case 'その他':
+      return 'blue-grey lighten-1';
+    default:
+      return 'grey lighten-1';
+  }
+};
 </script>
 
 <style scoped>
@@ -609,5 +744,85 @@ onMounted(() => {
 }
 .status-completed {
   background-color: #d4edda;
+}
+
+/* カードビュー用のスタイル */
+.completed-card {
+  background-color: #e0ffe0;
+}
+.in-progress-card {
+  background-color: #fff3cd;
+}
+.completed-card {
+  background-color: #d4edda;
+}
+
+/* モバイル表示の調整 */
+@media (max-width: 960px) {
+  .v-card-text p {
+    margin-bottom: 4px;
+  }
+  
+  .v-card-actions {
+    padding: 8px;
+  }
+  
+  .v-btn--small {
+    margin: 0 4px;
+    min-width: 70px !important;
+  }
+  
+  .mobile-card {
+    margin-bottom: 12px;
+  }
+  
+  .content-section {
+    background-color: #f9f9f9;
+    border-left: 4px solid #1976d2;
+    padding-left: 12px !important;
+  }
+  
+  .handler-info {
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    padding: 8px 12px !important;
+  }
+  
+  .handler-info .v-chip {
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+  
+  .comment-text {
+    white-space: pre-line;
+    max-height: 100px;
+    overflow-y: auto;
+    padding: 8px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+}
+
+/* モバイルコンテンツの表示改善 */
+.mobile-content {
+  line-height: 1.6;
+  font-size: 1rem;
+  word-break: break-word;
+}
+
+/* 小さいモバイル画面用の追加調整 */
+@media (max-width: 480px) {
+  .v-btn--small {
+    min-width: 60px !important;
+    padding: 0 4px !important;
+  }
+  
+  .v-card-actions {
+    flex-wrap: wrap;
+  }
+  
+  .mobile-content {
+    font-size: 0.95rem;
+  }
 }
 </style>
