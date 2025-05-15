@@ -120,6 +120,8 @@ bash backup_db.sh
 
 **注意**: 初回実行前に、`backup_db.sh`内の`BACKUP_DIR`変数を適切なバックアップディレクトリに設定してください。
 
+- ./backupsに設定した。✓
+
 ### データベース移行ツールの使用方法
 
 データベースのスキーマ変更を安全に行うための移行ツールを提供しています。
@@ -140,9 +142,13 @@ python db_migration.py --create-migration
 ```
 
 4. 移行の適用
+/home/felddorf/www/cgi-bin/requestForm_api/migrations内にあるファイルを指定する。
+migration_20250515_125441.json
 ```bash
 python db_migration.py --apply migrations/migration_YYYYMMDD_HHMMSS.json
 ```
+-> python db_migration.py --apply migrations/migration_20250515_125441.json
+
 
 ### 問題対応部署（会社）の追加
 

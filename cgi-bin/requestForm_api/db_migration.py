@@ -6,6 +6,8 @@ from datetime import datetime
 import subprocess
 import json
 from dotenv import load_dotenv
+from sqlalchemy import text  # 追加
+
 
 # 環境変数を読み込む
 load_dotenv()
@@ -117,7 +119,7 @@ def apply_migration(migration_file):
         with app.app_context():
             # マイグレーションSQLを実行
             for sql in migration_data.get('sql_statements', []):
-                db.session.execute(sql)
+                db.session.execute(text(sql))
             
             db.session.commit()
             print("マイグレーションが正常に適用されました")
