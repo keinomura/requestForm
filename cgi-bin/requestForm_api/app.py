@@ -30,7 +30,7 @@ db = SQLAlchemy(app)
 # db = SQLAlchemy(app)
 
 # MySQLデータベースの設定
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://felddorf_request_db:sakura2rental4db@mysql3102.db.sakura.ne.jp/felddorf_request_db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://felddorf_request_db:password@mysql3102.db.sakura.ne.jp/felddorf_request_db'
 # app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # db = SQLAlchemy(app)
 

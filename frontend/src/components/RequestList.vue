@@ -67,67 +67,160 @@
         </v-card>
       </v-dialog>
       
-      <!-- デスクトップ表示用のテーブル -->
-      <div class="d-none d-md-block">
-        <v-data-table
-          :headers="headers"
-          :items="filteredRequests"
-          class="elevation-1"
-          item-key="request_uuid"
-          dense
-          :item-class="getRowClass"
-          item-value="request_uuid"
-          show-expand
+  <!-- デスクトップ表示用のテーブル (大画面: 1920px以上) -->
+  <div class="d-none d-xl-block">
+    <v-data-table
+      :headers="headers"
+      :items="filteredRequests"
+      class="elevation-1"
+      item-key="request_uuid"
+      dense
+      :item-class="getRowClass"
+      item-value="request_uuid"
+      show-expand
+    >
+      <template v-slot:[`item.content`]="{ item }">
+        <div class="content-cell">{{ item.content }}</div>
+      </template>
+      <template v-slot:[`item.status`]="{ item }">
+        <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
+      </template>
+      <template v-slot:expanded-row="{ columns, item }">
+        <tr>
+          <td :colspan="columns.length">
+            <v-card flat>
+              <v-card-text>
+                <v-list dense>
+                  <v-list-item>
+                    <template v-slot:default>
+                      <div class="v-list-item-title">{{ item.response_comment }}</div>
+                      <div class="v-list-item-subtitle">
+                        <v-chip x-small :color="getHandlerColor(item.handler_company)" class="mr-1" v-if="item.handler_company">
+                          {{ item.handler_company }}
+                        </v-chip>
+                        {{ item.assigned_department }} {{ item.assigned_person }} {{ item.update_date }}
+                      </div>
+                    </template>
+                  </v-list-item>
+                </v-list>
+              </v-card-text>
+            </v-card>
+          </td>
+        </tr>
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-btn color="primary" @click="viewDetails(item.request_uuid)">
+          <v-icon left>mdi-eye</v-icon>
+          詳細
+        </v-btn>
+        <v-btn
+          color="secondary"
+          @click="openUpdateDialog(item)"
+          :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
         >
-          <template v-slot:[`item.status`]="{ item }">
-            <v-chip :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
-          </template>
-          <template v-slot:expanded-row="{ columns, item }">
-            <tr>
-              <td :colspan="columns.length">
-                <v-card flat>
-                  <v-card-text>
-                    <v-list dense>
-                      <v-list-item>
-                        <template v-slot:default>
-                          <div class="v-list-item-title">{{ item.response_comment }}</div>
-                          <div class="v-list-item-subtitle">
-                            <v-chip x-small :color="getHandlerColor(item.handler_company)" class="mr-1" v-if="item.handler_company">
-                              {{ item.handler_company }}
-                            </v-chip>
-                            {{ item.assigned_department }} {{ item.assigned_person }} {{ item.update_date }}
-                          </div>
-                        </template>
-                      </v-list-item>
-                    </v-list>
-                  </v-card-text>
-                </v-card>
-              </td>
-            </tr>
-          </template>
-          <template v-slot:[`item.actions`]="{ item }">
-            <v-btn color="primary" @click="viewDetails(item.request_uuid)">
-              <v-icon left>mdi-eye</v-icon>
-              詳細
-            </v-btn>
-            <v-btn
-              color="secondary"
-              @click="openUpdateDialog(item)"
-              :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
-            >
-              <v-icon left>mdi-pencil</v-icon>
-              進捗
-            </v-btn>
-            <v-btn
-              v-if="isAdminMode"
-              color="red"
-              @click="openDeleteDialog(item)"
-            >
-              <v-icon left>mdi-delete</v-icon>
-            </v-btn>
-          </template>
-        </v-data-table>
-      </div>
+          <v-icon left>mdi-pencil</v-icon>
+          進捗
+        </v-btn>
+        <v-btn
+          v-if="isAdminMode"
+          color="red"
+          @click="openDeleteDialog(item)"
+        >
+          <v-icon left>mdi-delete</v-icon>
+        </v-btn>
+      </template>
+    </v-data-table>
+  </div>
+  
+  <!-- 中間サイズ画面用のカードビュー (960px-1920px) -->
+  <div class="d-none d-md-block d-xl-none">
+    <v-container fluid>
+      <v-row>
+        <v-col cols="12" v-for="item in filteredRequests" :key="item.request_uuid" class="pa-2">
+          <v-card :class="getCardClass(item.status)" elevation="2" class="medium-card">
+            <v-card-title class="text-subtitle-1 py-2 d-flex justify-space-between">
+              <div class="d-flex align-center">
+                <span class="mr-2">No.{{ item.index }}</span>
+                <v-chip :color="getStatusColor(item.status)" dark small class="mr-2">{{ item.status }}</v-chip>
+              </div>
+              <div class="text-caption">{{ item.update_date }}</div>
+            </v-card-title>
+            
+            <!-- 内容セクション - 最も目立つように -->
+            <v-card-text class="medium-content-section py-3">
+              <p class="text-body-1 font-weight-medium medium-content">{{ item.content }}</p>
+            </v-card-text>
+            
+            <!-- 詳細情報セクション -->
+            <v-row no-gutters>
+              <v-col cols="12" md="6" lg="4">
+                <v-card-text class="py-2 px-4 grey lighten-4">
+                  <v-row dense>
+                    <v-col cols="12" sm="6">
+                      <p class="text-caption mb-1"><strong>部署:</strong> {{ item.requester_department }}</p>
+                    </v-col>
+                    <v-col cols="12" sm="6">
+                      <p class="text-caption mb-1"><strong>氏名:</strong> {{ item.requester_name }}</p>
+                    </v-col>
+                    <v-col cols="12">
+                      <p class="text-caption mb-1"><strong>登録日時:</strong> {{ item.input_date }}</p>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-col>
+              
+              <v-col cols="12" md="6" lg="4">
+                <v-card-text class="py-2 px-4 grey lighten-5">
+                  <v-row dense>
+                    <v-col cols="12">
+                      <p class="text-caption mb-1"><strong>担当部署:</strong> {{ item.assigned_department || '未設定' }}</p>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-chip small :color="getHandlerColor(item.handler_company)" class="mb-1 mr-1" v-if="item.handler_company">
+                        {{ item.handler_company }}
+                      </v-chip>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-col>
+              
+              <v-col cols="12" lg="4">
+                <v-card-text class="py-2 px-4" v-if="item.response_comment">
+                  <p class="text-caption font-weight-bold">最新コメント:</p>
+                  <p class="text-body-2 comment-text-medium">{{ item.response_comment }}</p>
+                </v-card-text>
+              </v-col>
+            </v-row>
+            
+            <!-- ボタンセクション -->
+            <v-card-actions class="pa-3 justify-end">
+              <v-btn color="primary" class="mx-1" @click="viewDetails(item.request_uuid)">
+                <v-icon left>mdi-eye</v-icon>
+                詳細
+              </v-btn>
+              <v-btn
+                color="secondary"
+                class="mx-1"
+                @click="openUpdateDialog(item)"
+                :disabled="!isAdminMode && item.status === '対応完了（電カル委員会承認）'"
+              >
+                <v-icon left>mdi-pencil</v-icon>
+                進捗
+              </v-btn>
+              <v-btn
+                v-if="isAdminMode"
+                color="red"
+                class="mx-1"
+                @click="openDeleteDialog(item)"
+              >
+                <v-icon left>mdi-delete</v-icon>
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
       
       <!-- モバイル表示用のカードビュー -->
       <div class="d-md-none">
@@ -390,17 +483,17 @@ const props = defineProps({
 });
 
 const headers = [
-  { text: 'No.', value: 'index', sortable: false },  // 行番号用の列を追加
-  { title: '内容', key: 'content' },
-  { title: '部署', key: 'requester_department' },
-  { title: '氏名', key: 'requester_name' },
-  { title: '登録日時', key: 'input_date' },
-  { title: '対応状況', key: 'status' },
-  { title: '対応企業', key: 'handler_company' },
-  { title: '担当部署', key: 'assigned_department' },
-  { title: 'コメント', key: 'data-table-expand'},
-  { title: '更新日時', key: 'update_date' },
-  { title: '', key: 'actions', sortable: false },
+  { text: 'No.', value: 'index', sortable: false, width: '50px' },
+  { title: '内容', key: 'content', width: '30%' },  // 内容列を広く設定
+  { title: '部署', key: 'requester_department', width: '10%' },
+  { title: '氏名', key: 'requester_name', width: '10%' },
+  { title: '登録日時', key: 'input_date', width: '10%' },
+  { title: '対応状況', key: 'status', width: '10%' },
+  { title: '対応企業', key: 'handler_company', width: '10%' },
+  { title: '担当部署', key: 'assigned_department', width: '10%' },
+  { title: 'コメント', key: 'data-table-expand', width: '5%' },
+  { title: '更新日時', key: 'update_date', width: '10%' },
+  { title: '', key: 'actions', sortable: false, width: '15%' },
 ];
 
 const statusOptions = [
@@ -757,6 +850,50 @@ const getHandlerColor = (company) => {
   background-color: #d4edda;
 }
 
+/* テーブル内の内容セルのスタイル */
+.content-cell {
+  font-weight: 500;
+  padding: 8px 0;
+  max-width: 100%;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* 中間サイズ画面用のスタイル (960px-1920px) */
+.medium-card {
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.medium-card:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.medium-content-section {
+  background-color: #f9f9f9;
+  border-left: 4px solid #1976d2;
+  padding-left: 16px !important;
+  margin-bottom: 8px;
+}
+
+.medium-content {
+  line-height: 1.6;
+  font-size: 1.05rem;
+  font-weight: 500;
+  word-break: break-word;
+  color: #333;
+}
+
+.comment-text-medium {
+  white-space: pre-line;
+  max-height: 80px;
+  overflow-y: auto;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
 /* モバイル表示の調整 */
 @media (max-width: 960px) {
   .v-card-text p {
@@ -823,6 +960,17 @@ const getHandlerColor = (company) => {
   
   .mobile-content {
     font-size: 0.95rem;
+  }
+}
+
+/* レスポンシブ調整 */
+@media (min-width: 961px) and (max-width: 1919px) {
+  .medium-card {
+    border-radius: 8px;
+  }
+  
+  .medium-content-section {
+    border-radius: 4px;
   }
 }
 </style>
