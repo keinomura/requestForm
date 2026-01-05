@@ -213,5 +213,16 @@ test/
 .env.production
 .env*
 
+# Security: Exclude files with actual credentials
+.env_for_mySQL
+backup_db.sh.production
+*.db
+*.sqlite
+*.sql
+*.sql.gz
+backups/
+
+# Credentials template file
+docs/CREDENTIALS.md
 
 # End of https://www.toptal.com/developers/gitignore/api/flask,vue

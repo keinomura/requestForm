@@ -1,18 +1,31 @@
 #!/bin/bash
 
+# Load environment variables from .env file
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Configuration
 # バックアップディレクトリの設定
 BACKUP_DIR="./backups"
 mkdir -p "$BACKUP_DIR"
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-# BACKUP_DIR="/Users/kei/MyCodes/requestForm_DB_backup"  # Change this to your preferred backup directory
-DB_USER="felddorf_request_db"
-DB_HOST="mysql3102.db.sakura.ne.jp"
-DB_NAME="felddorf_request_db"
 
-# Database password
-DB_PASSWORD="sakura2rental4db"
+# Database connection info from environment variables
+# 環境変数からデータベース接続情報を読み込む
+# DATABASE_URLの形式: mysql+pymysql://user:password@host/dbname
+if [ -z "$DATABASE_URL" ]; then
+    echo "Error: DATABASE_URL is not set in .env file"
+    exit 1
+fi
+
+# Parse DATABASE_URL to extract credentials
+# DATABASE_URLをパースして認証情報を抽出
+DB_USER=$(echo $DATABASE_URL | sed -n 's/.*:\/\/\([^:]*\):.*/\1/p')
+DB_PASSWORD=$(echo $DATABASE_URL | sed -n 's/.*:\/\/[^:]*:\([^@]*\)@.*/\1/p')
+DB_HOST=$(echo $DATABASE_URL | sed -n 's/.*@\([^\/]*\)\/.*/\1/p')
+DB_NAME=$(echo $DATABASE_URL | sed -n 's/.*\/\([^?]*\).*/\1/p')
 
 BACKUP_FILE="${BACKUP_DIR}/backup_${DB_NAME}_${TIMESTAMP}.sql"
 LOG_FILE="${BACKUP_DIR}/backup_log.txt"

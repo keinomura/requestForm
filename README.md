@@ -1,191 +1,403 @@
 # 要望管理システム
 
 ## 概要
-このシステムは、要望管理のためのウェブアプリケーションです。バックエンドはFlask、フロントエンドはVue.jsで構築されており、データベースにはさくらレンタルサーバーのMySQLを使用しています。
 
-## 機能
-- 要望の登録・一覧表示・検索
-- 進捗状況の更新
-- コメント履歴の管理
-- 対応部署（会社）の管理
+このシステムは、電子カルテシステムに対する要望・フィードバックをWeb経由で受け付け、一元管理するためのアプリケーションです。バックエンドはFlask、フロントエンドはVue.js 3で構築されており、データベースにはさくらレンタルサーバーのMySQLを使用しています。
+
+## 主な機能
+
+- 要望の登録・一覧表示・検索フィルタリング
+- 進捗状況の更新とステータス管理
+- コメント履歴の管理と閲覧
+- 対応企業・システムの分類管理
+- レスポンシブデザイン（PC・タブレット・スマートフォン対応）
+- 管理者モードによる削除機能
 
 ## システム構成
-- バックエンド: Flask (Python)
-- フロントエンド: Vue.js
-- データベース: MySQL (さくらレンタルサーバー)
 
-## セットアップ方法
+- **フロントエンド**: Vue.js 3 + Vuetify 3 + Vite
+- **バックエンド**: Flask + SQLAlchemy + Flask-CORS
+- **データベース**: MySQL 5.7+ (本番) / SQLite (開発)
+- **ホスティング**: さくらインターネット レンタルサーバー
 
-### 開発環境
+## 本番環境URL
 
-1. バックエンドのセットアップ
+- **アプリケーション**: https://felddorf.sakura.ne.jp/requestForm/
+- **API**: https://felddorf.sakura.ne.jp/requestForm_api/
+
+## リポジトリ
+
+- **GitHub**: https://github.com/keinomura/requestForm.git
+
+---
+
+## ドキュメント
+
+詳細なドキュメントは [docs/](docs/) ディレクトリに格納されています。
+
+### 📚 仕様書・マニュアル
+
+| ドキュメント | 説明 | リンク |
+|------------|------|--------|
+| **システム仕様書** | 機能仕様、画面仕様、業務フロー | [docs/specs/system/01_system_overview.md](docs/specs/system/01_system_overview.md) |
+| **技術仕様書** | アーキテクチャ、API仕様、データベース設計 | [docs/specs/technical/01_technical_architecture.md](docs/specs/technical/01_technical_architecture.md) |
+| **運用マニュアル** | デプロイ、バックアップ、トラブルシューティング | [docs/specs/operations/01_operations_manual.md](docs/specs/operations/01_operations_manual.md) |
+| **開発環境構築手順書** | ローカル開発環境のセットアップ | [docs/specs/development/01_development_setup.md](docs/specs/development/01_development_setup.md) |
+| **引き渡しチェックリスト** | SE部への引き渡し用チェックリスト | [docs/HANDOVER_CHECKLIST.md](docs/HANDOVER_CHECKLIST.md) |
+
+---
+
+## クイックスタート
+
+### 前提条件
+
+- Node.js 18.x 以上
+- Python 3.8 以上
+- Git
+
+### 1. リポジトリのクローン
+
 ```bash
-cd cgi-bin/requestForm_api
-pip install -r requirements.txt
+git clone https://github.com/keinomura/requestForm.git
+cd requestForm
 ```
 
-2. フロントエンドのセットアップ
+### 2. バックエンドのセットアップ
+
+```bash
+# ディレクトリ移動
+cd cgi-bin/requestForm_api
+
+# 仮想環境作成
+python3 -m venv venv
+
+# 仮想環境をアクティベート
+source venv/bin/activate  # macOS/Linux
+# または
+venv\Scripts\activate  # Windows
+
+# 依存パッケージインストール
+pip install -r requirements.txt
+
+# 環境変数設定（開発環境用）
+cat > .env << 'EOF'
+FLASK_ENV=development
+FLASK_DEBUG=1
+DATABASE_URL=sqlite:///../request_management.db
+API_PREFIX=/
+EOF
+
+# データベース初期化
+python3
+>>> from app import db
+>>> db.create_all()
+>>> exit()
+
+# 開発サーバー起動
+python3 app.py
+# http://127.0.0.1:5000 で起動
+```
+
+### 3. フロントエンドのセットアップ
+
+```bash
+# 別のターミナルを開く
+cd frontend
+
+# 依存パッケージインストール
+npm install
+
+# 環境変数設定（開発環境用）
+cat > .env.development << 'EOF'
+VITE_API_URL=http://127.0.0.1:5000
+VITE_BASE_URL=/
+EOF
+
+# 開発サーバー起動
+npm run dev
+# http://localhost:5173 で起動
+```
+
+### 4. ブラウザでアクセス
+
+http://localhost:5173/ にアクセスして動作確認
+
+---
+
+## 本番環境へのデプロイ
+
+詳細は [運用マニュアル](docs/specs/operations/01_operations_manual.md#3-デプロイ手順) を参照してください。
+
+### フロントエンドのデプロイ
+
 ```bash
 cd frontend
 npm install
-```
-
-3. 開発サーバーの起動
-```bash
-# バックエンド
-cd cgi-bin/requestForm_api
-python3 app.py
-
-# フロントエンド
-cd frontend
-npm run dev
-```
-
-### 本番環境へのデプロイ
-
-1. バックエンドのデプロイ
-```bash
-# さくらサーバーにファイルをアップロード
-scp -r cgi-bin/* username@your-server.sakura.ne.jp:~/www/cgi-bin/
-# 手作業でアップした。
-
-# 環境設定ファイルを本番用に切り替え
-ssh username@your-server.sakura.ne.jp "cp ~/www/cgi-bin/requestForm_api/.env_for_mySQL ~/www/cgi-bin/requestForm_api/.env"
-# もともとサーバーに本番用ファイルが置いてある。
-```
-
-
-2. フロントエンドのビルドとデプロイ
-```bash
-# ビルド
-cd frontend
 npm run build
-
-# さくらサーバーにファイルをアップロード
-scp -r dist/* username@your-server.sakura.ne.jp:~/www/requestForm/
-# 手作業でアップした。
-
+# dist/ フォルダの内容を ~/www/requestForm/ へアップロード
 ```
 
-## データベースバックアップと移行
+### バックエンドのデプロイ
 
+```bash
+# SSH接続
+ssh [username]@felddorf.sakura.ne.jp
+
+# ファイルをアップロード後、環境変数を本番用に切り替え
+cd ~/www/cgi-bin/requestForm_api
+cp .env_for_mySQL .env
+
+# 仮想環境セットアップ
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
+## データベース管理
 
 ### バックアップの実行
 
-
----
-
-# さくらサーバーにSSH等でログインしてサーバー内で実行してください。
-（ローカルPCから実行しても、MySQLに接続できない・権限エラーになる場合がほとんどです）
-
-### さくらレンタルサーバーにSSHで接続する方法
-
-1. **ターミナルを開く（Mac/Linuxの場合）またはコマンドプロンプト/PowerShellを開く（Windowsの場合）**
-
-2. **以下のコマンドを実行します。**
-
-ssh fe....rf@fe.....rf.sakura.ne.jp
-
-- 「ユーザー名」は、さくらサーバーのコントロールパネルで確認できるSSHアカウント名です。
-- 「サーバー名」は、契約しているサーバーのホスト名です。
-
-3. **初回接続時は「yes」と入力して接続を許可します。**
-
-4. **パスワードを入力します。**
-
-- パスワードはサーバーパスワードです。bp..........bb
-
-
-5. **接続が成功すると、サーバー内のコマンドライン操作が可能になります。**
+**注意**: さくらレンタルサーバーにSSHで接続してサーバー内で実行してください。
 
 ```bash
-# ファイルフォルダに移動
-cd www
+# SSH接続
+ssh [ユーザー名]@[サーバーホスト名]
+# パスワード: [サーバーパスワード]
 
-```
-
-**補足：**
-- パスワード認証ではなく、公開鍵認証を利用することもできます（推奨）。
-- 詳細は[さくらのサポートページ](https://help.sakura.ad.jp/206151922/)も参照してください。
-
----
-
-バックアップスクリプトを使用して、データベースのバックアップを作成します。
-
-
-```bash
-cd cgi-bin/requestForm_api
+# バックアップスクリプト実行
+cd ~/www/cgi-bin/requestForm_api
 bash backup_db.sh
 ```
 
-**注意**: 初回実行前に、`backup_db.sh`内の`BACKUP_DIR`変数を適切なバックアップディレクトリに設定してください。
+### データベース移行
 
-- ./backupsに設定した。✓
-
-### データベース移行ツールの使用方法
-
-データベースのスキーマ変更を安全に行うための移行ツールを提供しています。
-
-1. 現在のスキーマをエクスポート
 ```bash
+# スキーマエクスポート
 python db_migration.py --export-schema
-```
 
-2. バックアップの作成
-```bash
+# バックアップ作成
 python db_migration.py --backup
-```
 
-3. 新しい移行ファイルの作成
-```bash
-python db_migration.py --create-migration
-```
-
-4. 移行の適用
-/home/felddorf/www/cgi-bin/requestForm_api/migrations内にあるファイルを指定する。
-migration_20250515_125441.json
-```bash
-python db_migration.py --apply migrations/migration_YYYYMMDD_HHMMSS.json
-```
--> python db_migration.py --apply migrations/migration_20250515_125441.json
-
-
-### 問題対応部署（会社）の追加
-
-問題対応部署（会社）の項目を追加するための移行ファイルが用意されています。
-
-```bash
+# マイグレーション適用
 python db_migration.py --apply migrations/migration_add_handler_company.json
 ```
 
-## 時間表示の問題修正
+### 定期バックアップの設定（推奨）
 
-バックエンド、フロントエンド、データベース間での時間表示の不整合を修正しました。すべての時間はUTCで保存され、表示時に日本時間（JST、UTC+9）に変換されます。
+```bash
+# cron設定（毎日午前3時に自動バックアップ）
+crontab -e
 
-## レスポンシブデザインの改善
+# 以下を追加
+0 3 * * * cd /home/[username]/www/cgi-bin/requestForm_api && bash backup_db.sh
+```
 
-モバイル画面でのレイアウト問題を修正し、さまざまな画面サイズに対応するようにUIを改善しました。
+---
+
+## プロジェクト構造
+
+```
+requestForm/
+├── README.md                    # このファイル
+├── docs/                        # ドキュメント
+│   ├── specs/
+│   │   ├── system/             # システム仕様書
+│   │   ├── technical/          # 技術仕様書
+│   │   ├── operations/         # 運用マニュアル
+│   │   └── development/        # 開発環境構築手順書
+│   └── HANDOVER_CHECKLIST.md   # 引き渡しチェックリスト
+│
+├── frontend/                    # Vue.js フロントエンド
+│   ├── src/
+│   │   ├── components/         # Vueコンポーネント
+│   │   │   ├── RequestList.vue
+│   │   │   ├── AddRequest.vue
+│   │   │   └── UpdateProgress.vue
+│   │   ├── router/             # ルーティング設定
+│   │   ├── App.vue             # ルートコンポーネント
+│   │   └── main.js             # エントリーポイント
+│   ├── .env.development        # 開発環境設定
+│   ├── .env.production         # 本番環境設定
+│   ├── vite.config.js          # Viteビルド設定
+│   ├── package.json            # 依存関係
+│   └── dist/                   # ビルド成果物
+│
+└── cgi-bin/
+    └── requestForm_api/         # Flask バックエンド
+        ├── app.py               # メインアプリケーション
+        ├── db_migration.py      # データベース移行ツール
+        ├── backup_db.sh         # バックアップスクリプト
+        ├── .env                 # 環境変数（開発用）
+        ├── .env_for_mySQL       # 環境変数（本番用）
+        ├── requirements.txt     # 依存パッケージ
+        ├── venv/                # Python仮想環境
+        ├── migrations/          # マイグレーションファイル
+        └── backups/             # データベースバックアップ
+```
+
+---
+
+## 技術スタック
+
+### フロントエンド
+
+| 技術 | バージョン | 用途 |
+|------|-----------|------|
+| Vue.js | 3.5.12 | UIフレームワーク |
+| Vuetify | 3.7.4 | Material Designコンポーネント |
+| Vue Router | 4.4.5 | ルーティング |
+| Axios | 1.7.7 | HTTP通信 |
+| Vite | 5.4.10 | ビルドツール |
+
+### バックエンド
+
+| 技術 | バージョン | 用途 |
+|------|-----------|------|
+| Flask | latest | Webフレームワーク |
+| Flask-SQLAlchemy | - | ORM |
+| Flask-CORS | - | クロスオリジン対応 |
+| PyMySQL | - | MySQLドライバ |
+| Python | 3.x | 言語 |
+
+### データベース
+
+| 環境 | データベース |
+|------|------------|
+| 開発 | SQLite |
+| 本番 | MySQL 5.7+ |
+
+---
 
 ## トラブルシューティング
 
 ### データベース接続エラー
-- `.env`ファイルの`DATABASE_URL`が正しく設定されているか確認してください。
-- さくらサーバーのMySQLへの接続情報が正確か確認してください。
 
-### 時間表示の問題
-- フロントエンドとバックエンドの間で時間のフォーマットが一致しているか確認してください。
-- タイムゾーンの設定が正しいか確認してください。
+`.env` ファイルの `DATABASE_URL` が正しく設定されているか確認してください。
 
-## 定期的なメンテナンス
-
-1. 定期的なバックアップの実行
 ```bash
-# cronに登録して毎日実行するなど
-0 3 * * * cd /path/to/app/cgi-bin/requestForm_api && bash backup_db.sh
+# 開発環境
+DATABASE_URL=sqlite:///../request_management.db
+
+# 本番環境
+DATABASE_URL=mysql+pymysql://[データベース名]:[DBパスワード]@[MySQLホスト名]/[データベース名]
 ```
 
-2. 古いバックアップの削除
-バックアップスクリプトは30日以上経過したバックアップファイルを自動的に削除します。
+### APIが応答しない
+
+1. バックエンドサーバーが起動しているか確認
+2. CORSエラーがないかブラウザコンソールで確認
+3. ファイアウォール設定を確認
+
+### フロントエンドが表示されない
+
+1. `npm run build` でエラーがないか確認
+2. `.env.production` の `VITE_API_URL` が正しいか確認
+3. ブラウザのキャッシュをクリア（Ctrl+Shift+R / Cmd+Shift+R）
+
+詳細は [運用マニュアル - トラブルシューティング](docs/specs/operations/01_operations_manual.md#6-トラブルシューティング) を参照してください。
+
+---
+
+## セキュリティ上の注意事項
+
+⚠️ **重要**: このシステムには重大なセキュリティ上の問題があります。本番運用前に必ず対処してください。
+
+### 🔴 現在の重大な課題
+
+1. **パスワードのハードコーディング**
+   - フロントエンドのソースコードに操作パスワードが含まれている
+   - ブラウザの開発者ツールで誰でも閲覧可能
+   - **即座に対処が必要**
+
+2. **クライアント側のみの権限チェック**
+   - サーバー側での認証・認可がない
+   - APIを直接叩くことで不正操作が可能
+   - **即座に対処が必要**
+
+3. **データベース認証情報の管理**
+   - `.env_for_mySQL`ファイルに平文でパスワード保存
+   - ファイルへのアクセス制御が必要
+
+### ✅ 実施済みの対策
+
+- バックアップスクリプトから認証情報を削除（環境変数使用）
+- `.gitignore`に機密ファイルを追加
+- テンプレートファイルの作成（`.env_for_mySQL.template`）
+
+### 📋 推奨される改善ロードマップ
+
+**即座に実施**:
+- [ ] パスワードの変更
+- [ ] `.env`ファイルのパーミッション設定（`chmod 600`）
+
+**短期（1〜2ヶ月）**:
+- [ ] バックエンドでの認証システムの実装
+- [ ] JWT認証の導入
+- [ ] APIエンドポイントへの認証追加
+- [ ] ユーザー管理機能の実装
+
+**中期（3〜6ヶ月）**:
+- [ ] 役割ベースのアクセス制御（RBAC）
+- [ ] 監査ログの実装
+- [ ] セキュリティヘッダーの設定
+- [ ] CSRF保護の実装
+
+**詳細情報**:
+- [セキュリティガイド](docs/SECURITY.md) - 詳細な対策方法と実装例
+- [技術仕様書 - セキュリティ設計](docs/specs/technical/01_technical_architecture.md#8-セキュリティ設計)
+- [引き渡しチェックリスト](docs/HANDOVER_CHECKLIST.md)
+
+---
+
+## 定期メンテナンス
+
+### 日次
+
+- サイトアクセス確認
+- API応答確認
+- バックアップ実施確認
+
+### 月次
+
+- 依存パッケージのアップデート確認
+- セキュリティパッチ適用
+- データベース最適化
+
+詳細は [運用マニュアル - 定期メンテナンス](docs/specs/operations/01_operations_manual.md#8-定期メンテナンス) を参照してください。
+
+---
+
+## 引き渡しについて
+
+このプロジェクトをSE部へ引き渡す際は、[引き渡しチェックリスト](docs/HANDOVER_CHECKLIST.md) を参照してください。
+
+---
+
+## サポート・問い合わせ
+
+| 項目 | 連絡先 |
+|------|--------|
+| システム管理者 | SE部 |
+| リポジトリ | https://github.com/keinomura/requestForm.git |
+| Issues | https://github.com/keinomura/requestForm/issues |
+
+---
 
 ## ライセンス
+
 このプロジェクトは内部利用を目的としており、無断での複製・配布は禁止されています。
+
+---
+
+## 改訂履歴
+
+| バージョン | 日付 | 変更内容 |
+|-----------|------|---------|
+| 1.0 | 2025-05-15 | 初版リリース |
+| 2.0 | 2026-01-05 | SE部引き渡し版：包括的なドキュメント追加 |
+
+---
+
+**以上**
